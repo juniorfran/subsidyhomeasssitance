@@ -1,0 +1,111 @@
+{% load static %}
+<!-- Header Start -->
+    <div class="container-fluid bg-light my-6 mt-0" id="home">
+        <div class="container">
+            <div class="row g-5 align-items-center">
+                <div class="col-lg-6 py-6 pb-0 pt-lg-0">
+                    <h3 class="text-primary mb-3">Somos</h3>
+                    <h1 class="display-3 mb-3">Hispanic Assistance</h1>
+                    <h2 class="typed-text-output d-inline"></h2>
+                    <div class="typed-text d-none">internet, telefonia celular, otros servicios.</div>
+                    <div class="d-flex align-items-center pt-5">
+                        <button type="button" class="btn btn-primary py-3 px-4 me-5" data-bs-toggle="modal" data-bs-target="#serviciosModal">
+                            Servicios
+                        </button>
+                        <button type="button" class="btn btn-primary py-3 px-4 me-5" data-bs-toggle="modal" data-bs-target="#pagoModal">
+                            Pagar
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <img class="img-fluid" src="{% static "img/profile1.png" %}" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Header End -->
+
+<!-- Modal Servicios -->
+<div class="modal fade" id="serviciosModal" tabindex="-1" aria-labelledby="serviciosModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="serviciosModalLabel">Nuestros Servicios</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-4">
+          {% for servicio in servicios %}
+            <div class="col-md-6">
+              <div class="border rounded p-3 h-100">
+                {% if servicio.imagen %}
+                  <img src="{{ servicio.imagen.url }}" class="img-fluid mb-2 rounded" alt="{{ servicio.nombre }}">
+                {% else %}
+                  <i class="{{ servicio.icono|default:'fa fa-cogs' }} fa-2x text-primary mb-2"></i>
+                {% endif %}
+                <h5>{{ servicio.nombre }}</h5>
+                <p>{{ servicio.descripcion }}</p>
+                {% if servicio.precio > 0 %}
+                  <span class="badge bg-primary">Desde ${{ servicio.precio }}</span>
+                {% endif %}
+              </div>
+            </div>
+          {% empty %}
+            <p>No hay servicios disponibles por el momento.</p>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Servicios End -->
+
+
+<!-- Modal Pago -->
+<div class="modal fade" id="pagoModal" tabindex="-1" aria-labelledby="pagoModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+    <form id="pagoForm" method="post" action="{% url 'crear_pago' %}">
+      {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="pagoModalLabel">Generar enlace de pago</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+            <div class="mb-3">
+                <label>Nombre</label>
+                <input type="text" name="nombre" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label>Correo</label>
+                <input type="email" name="correo" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label>Monto a pagar</label>
+                <input type="number" step="0.01" name="monto" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label>Descripción (opcional)</label>
+                <textarea name="descripcion" class="form-control"></textarea>
+            </div>
+
+            <div id="pagoSpinner" class="text-center d-none">
+              <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Procesando...</span>
+              </div>
+              <p>Generando enlace de pago, por favor espera...</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Generar Enlace</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- Modal Pago End -->
+

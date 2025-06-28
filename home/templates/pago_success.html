@@ -1,0 +1,9 @@
+{% load static %}
+{% extends "home.html" %}
+{% block content %}
+  <div class="container py-5 text-center">
+    <h1>Enlace de pago generado con éxito</h1>
+    <p>Haz clic en el siguiente botón para completar tu pago:</p>
+    <a class="btn btn-success" href="{{ link }}" target="_blank">Ir a Pagar</a>
+  </div>
+{% endblock %}
