@@ -5,7 +5,7 @@
             <div class="row g-5 align-items-center">
                 <div class="col-lg-6 py-6 pb-0 pt-lg-0">
                     <h3 class="text-primary mb-3">Somos</h3>
-                    <h1 class="display-3 mb-3">Hispanic Assistance</h1>
+                    <h1 class="display-3 mb-3">X Soporte latino</h1>
                     <h2 class="typed-text-output d-inline"></h2>
                     <div class="typed-text d-none">internet, telefonia celular, otros servicios.</div>
                     <div class="d-flex align-items-center pt-5">
@@ -76,21 +76,23 @@
         </div>
         <div class="modal-body">
             <div class="mb-3">
-                <label>Nombre</label>
-                <input type="text" name="nombre" class="form-control" required>
+              <label>Nombre</label>
+              <input type="text" name="nombre" class="form-control" required minlength="3" placeholder="Ej: Juan Pérez">
             </div>
             <div class="mb-3">
-                <label>Correo</label>
-                <input type="email" name="correo" class="form-control" required>
+              <label>Correo</label>
+              <input type="email" name="correo" class="form-control" required placeholder="correo@ejemplo.com">
             </div>
             <div class="mb-3">
-                <label>Monto a pagar</label>
-                <input type="number" step="0.01" name="monto" class="form-control" required>
+              <label>Monto a pagar</label>
+              <input type="number" step="0.01" name="monto" class="form-control" required min="0.01" placeholder="Mínimo $0.01">
             </div>
             <div class="mb-3">
-                <label>Descripción (opcional)</label>
-                <textarea name="descripcion" class="form-control"></textarea>
+              <label>Referencia</label>
+              <textarea name="descripcion" class="form-control" maxlength="255" placeholder="Opcional"></textarea>
             </div>
+
+          <p class="text-muted">Nota: El enlace de pago se generará con base a la información proporcionada. Asegúrate de que todos los datos sean correctos.</p>
 
             <div id="pagoSpinner" class="text-center d-none">
               <div class="spinner-border text-primary" role="status">
@@ -108,4 +110,58 @@
   </div>
 </div>
 <!-- Modal Pago End -->
+
+<div class="modal fade" id="pagoExitoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">¡Pago en proceso!</h5>
+      </div>
+      <div class="modal-body">
+        <p>Se generó el enlace de pago. Sigue el proceso en la nueva pestaña.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-success" data-bs-dismiss="modal">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if pago_ok and pago_url %}
+<script>
+    window.open("{{ pago_url }}", "_blank");
+    var modal = new bootstrap.Modal(document.getElementById("pagoExitoModal"));
+    modal.show();
+</script>
+{% endif %}
+
+<script>
+  document.getElementById("pagoForm").addEventListener("submit", function(e) {
+    const nombre = this.nombre.value.trim();
+    const correo = this.correo.value.trim();
+    const monto = parseFloat(this.monto.value);
+
+    if (nombre.length < 3) {
+      alert("Por favor, ingresa un nombre válido (mínimo 3 caracteres).");
+      e.preventDefault();
+      return;
+    }
+
+    if (!correo.includes("@")) {
+      alert("Por favor, ingresa un correo válido.");
+      e.preventDefault();
+      return;
+    }
+
+    if (isNaN(monto) || monto <= 0) {
+      alert("El monto debe ser mayor a cero.");
+      e.preventDefault();
+      return;
+    }
+
+    // mostrar spinner
+    document.getElementById("pagoSpinner").classList.remove("d-none");
+  });
+</script>
+
 

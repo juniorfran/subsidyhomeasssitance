@@ -14,14 +14,56 @@
         </div>
         <div class="row g-5">
             <div class="col-lg-5 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                <p class="mb-2">Nuestra oficina:</p>
-                <h3 class="fw-bold">123 Calle Principal, Nueva York, USA</h3>
+                <p class="mb-2">Nuestros Horarios:</p>
+                <div class="table-responsive">
+                <table class="table table-bordered text-center">
+                    <thead class="table-primary">
+                    <tr>
+                        <th>Día</th>
+                        <th>Horario</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Lunes</td>
+                        <td>9:00 a. m. - 7:00 p. m.</td>
+                    </tr>
+                    <tr>
+                        <td>Martes</td>
+                        <td>9:00 a. m. - 7:00 p. m.</td>
+                    </tr>
+                    <tr>
+                        <td>Miércoles</td>
+                        <td>9:00 a. m. - 7:00 p. m.</td>
+                    </tr>
+                    <tr>
+                        <td>Jueves</td>
+                        <td>9:00 a. m. - 7:00 p. m.</td>
+                    </tr>
+                    <tr>
+                        <td>Viernes</td>
+                        <td>9:00 a. m. - 7:00 p. m.</td>
+                    </tr>
+                    <tr>
+                        <td>Sábado</td>
+                        <td>9:00 a. m. - 1:00 p. m.</td>
+                    </tr>
+                    <tr class="table-secondary">
+                        <td>Domingo</td>
+                        <td>Cerrado</td>
+                    </tr>
+                    </tbody>
+                </table>
+                </div>
                 <hr class="w-100">
                 <p class="mb-2">Llámanos:</p>
-                <h3 class="fw-bold">+012 345 6789</h3>
+                <h3 class="fw-bold">(801) 477-8742 </h3>
                 <hr class="w-100">
                 <p class="mb-2">Envíanos un correo:</p>
-                <h3 class="fw-bold">info@example.com</h3>
+                <h3 class="fw-bold">
+                <a href="mailto:subsidyhomeasistance@outlook.com">subsidyhomeasistance@outlook.com</a> |
+                <a href="mailto:d12_devil@live.com">d12_devil@live.com</a>
+                </h3>
                 <hr class="w-100">
                 <p class="mb-2">Síguenos:</p>
                 <div class="d-flex pt-2">
@@ -32,8 +74,9 @@
                 </div>
             </div>
             <div class="col-lg-7 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
-                <p class="mb-4">Contactanos para obtener mayor informacion sobre nuestros servicios <a href="https://htmlcodex.com/contact-form">Descargar ahora</a>.</p>
-                <form>
+                <p class="mb-4">Contactanos para obtener mayor informacion sobre nuestros servicios.</p>
+                <form method="post" action="{% url 'contacto' %}">
+                    {% csrf_token %}
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="form-floating">

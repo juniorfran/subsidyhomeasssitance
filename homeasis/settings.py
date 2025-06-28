@@ -76,12 +76,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'homeasis.wsgi.application'
 
+# Cbn3OsIQSqRyQ_Uk
+# HY_H-mtzRBPkcbcxRThfvdszPM7mV2_I
+
 # settings.py
-MOOV_USERNAME = "tu_usuario_moov"
-MOOV_PASSWORD = "tu_password_moov"
-MOOV_ACCOUNT_ID = "cc1d04a8-03b1-4600-b675-e6180d574074"  # ejemplo
-MOOV_PARTNER_ACCOUNT_ID = "d290f1ee-6c54-4b01-90e6-d701748f0851"
-MOOV_MERCHANT_PAYMENT_METHOD_ID = "4c4e7f8e-81f4-4f3d-8f6f-6f6e7f8e4c4e"
+MOOV_USERNAME = "WEGidQgYRt77Sb3Y"
+MOOV_PASSWORD = "nzDaL-20IEDvImiZjQYC_qRxgcSCchSZ"
+MOOV_ACCOUNT_ID = "26d9e511-59d1-4217-bf4a-0d8c79539efd"  # ejemplo
+MOOV_PARTNER_ACCOUNT_ID = "26d9e511-59d1-4217-bf4a-0d8c79539efd"
+MOOV_MERCHANT_PAYMENT_METHOD_ID = "33eacac9-3294-4848-8dfd-f107ca03f58f"
+
+MOOV_CLIENT_ID = "WEGidQgYRt77Sb3Y"
+MOOV_CLIENT_SECRET = "nzDaL-20IEDvImiZjQYC_qRxgcSCchSZ"
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases

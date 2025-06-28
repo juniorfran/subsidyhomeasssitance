@@ -1,0 +1,33 @@
+{% extends "home.html" %}
+{% load static %}
+
+{% block content %}
+
+  <h1>Obtener token Moov</h1>
+
+  <form method="post" style="margin-bottom: 2em;">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Solicitar token</button>
+  </form>
+
+  {% if token %}
+    <div style="background: #f6f6f6; border: 1px solid #ccc; padding: 1em; border-radius: 5px;">
+      <h2 style="color: #2c3e50;">Token recibido</h2>
+      <ul style="list-style: none; padding-left: 0;">
+        <li><strong>Access token:</strong><br><code style="word-wrap: break-word;">{{ token.access_token }}</code></li>
+        <li><strong>Expires in:</strong> {{ token.expires_in }} segundos</li>
+        <li><strong>Scope:</strong> {{ token.scope }}</li>
+        <li><strong>Refresh token:</strong><br><code style="word-wrap: break-word;">{{ token.refresh_token }}</code></li>
+        <li><strong>Token type:</strong> {{ token.token_type }}</li>
+      </ul>
+    </div>
+  {% endif %}
+
+  {% if error %}
+    <div style="background: #ffe6e6; border: 1px solid #cc0000; padding: 1em; border-radius: 5px;">
+      <h2 style="color: #cc0000;">Error</h2>
+      <pre>{{ error }}</pre>
+    </div>
+  {% endif %}
+
+{% endblock content %}

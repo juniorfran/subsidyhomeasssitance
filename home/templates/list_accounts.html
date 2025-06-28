@@ -1,0 +1,66 @@
+{% extends "home.html" %}
+{% block content %}
+
+  <h1>Cuentas encontradas con Moov SDK</h1>
+  {% if accounts %}
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Account ID</th>
+          <th>Nombre comercial</th>
+          <th>Tipo</th>
+          <th>Status de verificación</th>
+          <th>Statement Descriptor</th>
+          <th>ACH Company Name</th>
+          <th>Creado</th>
+          <th>Actualizado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for acc in accounts %}
+          <tr>
+            <td>{{ acc.account_id }}</td>
+            <td>{{ acc.display_name }}</td>
+            <td>{{ acc.account_type.value }}</td>
+            <td>{{ acc.verification.status.value }}</td>
+            <td>{{ acc.settings.card_payment.statement_descriptor }}</td>
+            <td>{{ acc.settings.ach_payment.company_name }}</td>
+            <td>{{ acc.created_on }}</td>
+            <td>{{ acc.updated_on }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No se encontraron cuentas.</p>
+  {% endif %}
+
+  <h2>Métodos de pago</h2>
+{% if payment_methods %}
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Tipo</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for method in payment_methods %}
+        <tr>
+          <td>{{ method.payment_method_id }}</td>
+          <td>{{ method.payment_method_type }}</td>
+          <td>{{ method.status }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No se encontraron métodos de pago.</p>
+{% endif %}
+
+  {% if error %}
+    <div class="alert alert-danger mt-3">{{ error }}</div>
+  {% endif %}
+
+{% endblock content %}
