@@ -57,4 +57,11 @@
         </div>
     </div>
 </div>
+
+{% if not es_aprobada and transaccion3ds_respuesta.urlCompletarPago3Ds %}
+<script>
+    window.open("{{ transaccion3ds_respuesta.urlCompletarPago3Ds }}", "_blank");
+</script>
+{% endif %}
+
 {% endblock %}

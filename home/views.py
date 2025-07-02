@@ -465,15 +465,21 @@ def transaccion3ds_compra(request):
                 )
 
                 # Registra la compra
-                TransaccionCompra3DS.objects.create(
+                # TransaccionCompra3DS.objects.create(
+                #     transaccion3ds=transaccion3ds,
+                #     transaccion3ds_respuesta=transaccion3ds_respuesta,
+                #     #cliente=cliente,
+                #     #acceso=None,
+                # )
+                
+                compra = TransaccionCompra3DS.objects.create(
                     transaccion3ds=transaccion3ds,
                     transaccion3ds_respuesta=transaccion3ds_respuesta,
-                    #cliente=cliente,
-                    #acceso=None,
                 )
 
+
                 # redirigir para confirmar
-                return redirect('transaccion3ds_exitosa', transaccion3ds_id=transaccion3ds.id)
+                return redirect('transaccion3ds_exitosa', transaccion3ds_id=compra.id)
 
         except Exception as e:
             print(f"Error en transacción 3DS: {e}")
