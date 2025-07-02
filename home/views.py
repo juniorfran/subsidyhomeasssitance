@@ -585,7 +585,7 @@ def transaccion3ds_compra(request):
                     transaccion3ds=transaccion3ds,
                     transaccion3ds_respuesta=transaccion3ds_respuesta,
                     #cliente=cliente,
-                )
+                
 
                 # crea la compra
                 compra = TransaccionCompra3DS.objects.create(
