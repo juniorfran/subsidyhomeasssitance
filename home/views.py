@@ -8,6 +8,7 @@ import requests
 from .models import Clientes, ContactMessage, MoovBusinessAccount, Service, PaymentLink, MoovConfig, Transaccion3DS, Transaccion3DS_Respuesta, TransaccionCompra3DS, wompi_config
 from django.views import View
 from django.contrib import messages
+from django.core.mail import send_mail
 
 # SDK
 from moovio_sdk import Moov
@@ -533,6 +534,7 @@ def transaccion3ds_compra(request):
         apellido = request.POST.get('apellido')
         direccion = request.POST.get('direccion')
         ciudad = request.POST.get('ciudad')
+        email_client = request.POST.get('email')
         email = "juniorfran@hotmail.es"
         telefono = 60447435
         numtarjeta = request.POST.get('numtarjeta')
@@ -579,14 +581,9 @@ def transaccion3ds_compra(request):
                 )
 
                 # Registra la compra
-                # TransaccionCompra3DS.objects.create(
-                #     transaccion3ds=transaccion3ds,
-                #     transaccion3ds_respuesta=transaccion3ds_respuesta,
-                #     #cliente=cliente,
-                #     #acceso=None,
-                # )
-                
-
+                TransaccionCompra3DS.objects.create(
+                    transaccion3ds=transaccion3ds,
+                    transaccion3ds_respuesta=transaccion3ds_respuesta,
                     #cliente=cliente,
                 )
 
@@ -596,6 +593,25 @@ def transaccion3ds_compra(request):
                     transaccion3ds_respuesta=transaccion3ds_respuesta,
                 )
                 print(f"DEBUG - Se creó TransaccionCompra3DS con id: {compra.id}")
+
+                # -------- ENVIAR CORREO DE CONFIRMACIÓN ------------
+                asunto = "Confirmación de pago - X Soporte Latino"
+                mensaje = (
+                    f"Estimado {nombre} {apellido},\n\n"
+                    f"Gracias por realizar su pago de ${monto:.2f}.\n"
+                    f"Su referencia de transacción es: {transaccion3ds_respuesta.idTransaccion}.\n\n"
+                    f"Saludos,\n"
+                    f"Equipo de X Soporte Latino"
+                )
+                send_mail(
+                    subject=asunto,
+                    message=mensaje,
+                    from_email="xsoportelatino@gmail.com",
+                    recipient_list=[email_client],
+                    fail_silently=False,
+                )
+                print(f"Correo de confirmación enviado a {email_client}")
+                # -----------------------------------------------------
 
                 # redirige con el id correcto
                 return redirect('transaccion3ds_exitosa', transaccion3ds_id=compra.id)
