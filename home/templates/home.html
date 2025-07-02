@@ -117,4 +117,17 @@
     <script src="{% static "js/main.js" %}"></script>
 </body>
 
+<script>
+  window.addEventListener("load", function() {
+    // Intentar abrir un popup de prueba
+    const testPopup = window.open("", "_blank");
+
+    if (!testPopup || testPopup.closed || typeof testPopup.closed == "undefined") {
+      alert("⚠️ Por favor permita ventanas emergentes (pop-ups) en su navegador para usar todas las funcionalidades de este sitio.");
+    } else {
+      testPopup.close();
+    }
+  });
+</script>
+
 </html>

@@ -85,3 +85,79 @@ class ContactMessage(models.Model):
 
     def __str__(self):
         return f"{self.nombre} ({self.email}) - {self.asunto}"
+    
+
+##############3 wompi models tansaccion 3ds ####################
+
+class Clientes (models.Model):
+    nombre = models.CharField( max_length=50)
+    apellido = models.CharField( max_length=50)
+    direccion = models.TextField()
+    dui = models.CharField(max_length=50)
+    email = models.EmailField()
+    telefono = models.CharField(max_length=20)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_modificacion = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.nombre} - {self.apellido}"
+
+
+class wompi_config (models.Model):
+    cuenta = models.CharField(max_length=800, blank=True, null=True)
+    client_id = models.TextField(max_length=800, blank=True, null=True)
+    client_secret = models.TextField(max_length=800, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    #funcion str
+    def __str__(self):
+        return self.cuenta
+    
+    class Meta:
+        verbose_name = "Configuración Wompi"
+        verbose_name_plural = "Configuraciones Wompi"
+   
+class Transaccion3DS(models.Model):
+    #acceso = models.ForeignKey(Accesos, on_delete=models.CASCADE, related_name='transaccion3ds_acceso')
+    numeroTarjeta = models.CharField(max_length=150)
+    mesVencimiento = models.CharField(max_length=50)
+    anioVencimiento = models.CharField(max_length=50)
+    cvv = models.CharField(max_length=50)
+    monto = models.CharField(max_length=50)
+    nombre = models.CharField(max_length=150)
+    apellido = models.CharField(max_length=150)
+    email = models.CharField(max_length=150)
+    ciudad = models.CharField(max_length=50)
+    direccion = models.TextField()
+    telefono = models.CharField( max_length=50)
+    
+    fecha_creacion = models.DateTimeField(auto_now_add=True, null=True)
+    fecha_modificacion = models.DateTimeField(auto_now=True, null=True)
+    estado = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return f"{self.nombre} - {self.apellido}"
+    
+class Transaccion3DS_Respuesta(models.Model):
+    transaccion3ds = models.ForeignKey(Transaccion3DS, on_delete=models.CASCADE, related_name='transaccion3ds_respuesta_set')
+    idTransaccion = models.CharField(max_length=150)
+    esReal = models.BooleanField(default=True)
+    urlCompletarPago3Ds = models.URLField(max_length=500)
+    monto = models.CharField(max_length=50)
+    fecha_creacion = models.DateTimeField(auto_now_add=True, null=True)
+    fecha_modificacion = models.DateTimeField(auto_now=True, null=True)
+    
+    def __str__(self):
+        return f"{self.transaccion3ds} - {self.idTransaccion}"
+    
+class TransaccionCompra3DS(models.Model):
+    transaccion3ds = models.ForeignKey(Transaccion3DS, on_delete=models.CASCADE, related_name='transaccion3ds_set')
+    transaccion3ds_respuesta = models.ForeignKey(Transaccion3DS_Respuesta, on_delete=models.CASCADE, related_name='transaccion3ds_respuesta_set')
+    #cliente = models.ForeignKey(Clientes, on_delete=models.CASCADE, related_name='cliente_transaccion3ds_set')
+    #acceso = models.ForeignKey(Accesos, on_delete=models.CASCADE, related_name='acceso_transaccion3ds_set')
+    fecha_creacion = models.DateTimeField(auto_now_add=True, null=True)
+    fecha_modificacion = models.DateTimeField(auto_now=True, null=True)
+    estado = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return f"{self.transaccion3ds} - {self.fecha_creacion}"

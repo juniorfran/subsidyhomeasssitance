@@ -1,70 +1,49 @@
 {% load static %}
-<!-- Header Start -->
-    <div class="container-fluid bg-light my-6 mt-0" id="home">
-        <div class="container">
-            <div class="row g-5 align-items-center">
-                <div class="col-lg-6 py-6 pb-0 pt-lg-0">
-                    <h3 class="text-primary mb-3">Somos</h3>
-                    <h1 class="display-3 mb-3">X Soporte latino</h1>
-                    <h2 class="typed-text-output d-inline"></h2>
-                    <div class="typed-text d-none">internet, telefonia celular, otros servicios.</div>
-                    <div class="d-flex align-items-center pt-5">
-                        <button type="button" class="btn btn-primary py-3 px-4 me-5" data-bs-toggle="modal" data-bs-target="#serviciosModal">
-                            Servicios
-                        </button>
-                        <button type="button" class="btn btn-primary py-3 px-4 me-5" data-bs-toggle="modal" data-bs-target="#pagoModal">
-                            Pagar
-                        </button>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <img class="img-fluid" src="{% static "img/profile1.png" %}" alt="">
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Header End -->
 
-<!-- Modal Servicios -->
-<div class="modal fade" id="serviciosModal" tabindex="-1" aria-labelledby="serviciosModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="serviciosModalLabel">Nuestros Servicios</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        <div class="row g-4">
-          {% for servicio in servicios %}
-            <div class="col-md-6">
-              <div class="border rounded p-3 h-100">
-                {% if servicio.imagen %}
-                  <img src="{{ servicio.imagen.url }}" class="img-fluid mb-2 rounded" alt="{{ servicio.nombre }}">
-                {% else %}
-                  <i class="{{ servicio.icono|default:'fa fa-cogs' }} fa-2x text-primary mb-2"></i>
-                {% endif %}
-                <h5>{{ servicio.nombre }}</h5>
-                <p>{{ servicio.descripcion }}</p>
-                {% if servicio.precio > 0 %}
-                  <span class="badge bg-primary">Desde ${{ servicio.precio }}</span>
-                {% endif %}
-              </div>
-            </div>
-          {% empty %}
-            <p>No hay servicios disponibles por el momento.</p>
-          {% endfor %}
+<!-- Header Start -->
+<div class="container-fluid bg-light my-6 mt-0" id="home">
+  <div class="container">
+    <div class="row g-5 align-items-center">
+      <div class="col-lg-6 py-6 pb-0 pt-lg-0">
+        <h3 class="text-primary mb-3">Somos</h3>
+        <h1 class="display-3 mb-3">X Soporte Latino</h1>
+        <h2 class="typed-text-output d-inline"></h2>
+        <div class="typed-text d-none">internet, telefonia celular, otros servicios.</div>
+        <div class="d-flex align-items-center pt-5">
+          <button type="button" class="btn btn-primary py-3 px-4 me-5" id="pagoSelectorBtn">
+            Pagar
+          </button>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      <div class="col-lg-6">
+        <img class="img-fluid" src="{% static 'img/profile1.png' %}" alt="">
       </div>
     </div>
   </div>
 </div>
-<!-- Modal Servicios End -->
+<!-- Header End -->
 
+<!-- Modal Selector de Pago -->
+<div class="modal fade" id="selectorPagoModal" tabindex="-1" aria-labelledby="selectorPagoModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Selecciona un método de pago</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Cómo deseas realizar tu pago?</p>
+        <div class="d-grid gap-2">
+          <button class="btn btn-primary" id="botonPagoDirecto">Pago directo con tarjeta</button>
+          <button class="btn btn-secondary" id="botonPagoLink">Generar enlace de pago</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Fin Modal Selector de Pago -->
 
-<!-- Modal Pago -->
+<!-- Modal Pago Link -->
 <div class="modal fade" id="pagoModal" tabindex="-1" aria-labelledby="pagoModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -75,42 +54,111 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
-            <div class="mb-3">
-              <label>Nombre</label>
-              <input type="text" name="nombre" class="form-control" required minlength="3" placeholder="Ej: Juan Pérez">
-            </div>
-            <div class="mb-3">
-              <label>Correo</label>
-              <input type="email" name="correo" class="form-control" required placeholder="correo@ejemplo.com">
-            </div>
-            <div class="mb-3">
-              <label>Monto a pagar</label>
-              <input type="number" step="0.01" name="monto" class="form-control" required min="0.01" placeholder="Mínimo $0.01">
-            </div>
-            <div class="mb-3">
-              <label>Referencia</label>
-              <textarea name="descripcion" class="form-control" maxlength="255" placeholder="Opcional"></textarea>
-            </div>
-
-          <p class="text-muted">Nota: El enlace de pago se generará con base a la información proporcionada. Asegúrate de que todos los datos sean correctos.</p>
-
-            <div id="pagoSpinner" class="text-center d-none">
-              <div class="spinner-border text-primary" role="status">
-                  <span class="visually-hidden">Procesando...</span>
-              </div>
-              <p>Generando enlace de pago, por favor espera...</p>
+          <div class="mb-3">
+            <label>Nombre</label>
+            <input type="text" name="nombre" class="form-control" required minlength="3">
+          </div>
+          <div class="mb-3">
+            <label>Correo</label>
+            <input type="email" name="correo" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label>Monto a pagar</label>
+            <input type="number" step="0.01" name="monto" class="form-control" required min="0.01">
+          </div>
+          <div class="mb-3">
+            <label>Referencia</label>
+            <textarea name="descripcion" class="form-control" maxlength="255"></textarea>
+          </div>
+          <p class="text-muted">El enlace de pago se generará con la información ingresada.</p>
+          <div id="pagoSpinner" class="text-center d-none">
+            <div class="spinner-border text-primary"></div>
+            <p>Generando enlace de pago, por favor espera...</p>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Generar Enlace</button>
+          <button type="submit" class="btn btn-primary">Generar enlace</button>
         </div>
-      </form>
+    </form>
     </div>
   </div>
 </div>
-<!-- Modal Pago End -->
+<!-- Fin Modal Pago Link -->
 
+<!-- Modal Pago Directo -->
+<div class="modal fade" id="pagoDirectoModal" tabindex="-1" aria-labelledby="pagoDirectoModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+    <form id="pagoDirectoForm" method="post" action="{% url 'transaccion3ds_compra' %}">
+      {% csrf_token %}
+      <div class="modal-header">
+        <h5 class="modal-title">Pago directo con tarjeta</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+          <div class="mb-3">
+            <label>Nombre</label>
+            <input type="text" name="nombre" id="nombre" required class="form-control">
+          </div>
+          <div class="mb-3">
+            <label>Apellido</label>
+            <input type="text" name="apellido" id="apellido" required class="form-control">
+          </div>
+          {% comment %} <div class="mb-3">
+            <label>Correo</label>
+            <input type="email" name="email" required class="form-control">
+          </div> {% endcomment %}
+          {% comment %} <div class="mb-3">
+            <label>Teléfono</label>
+            <input type="text" name="telefono" required class="form-control">
+          </div> {% endcomment %}
+          <div class="mb-3">
+            <label>Número de tarjeta</label>
+            <input type="text" name="numtarjeta" id="numtarjeta" class="form-control" pattern="\d{12,19}" title="Ingrese entre 12 y 19 dígitos" required>
+          </div>
+          <div class="row">
+            <div class="col-md-4">
+              <label>Mes vencimiento</label>
+                <input type="text" name="mesvencimiento"  id="mes" class="form-control" pattern="\d{2}" title="Ej: 02" required>
+            </div>
+            <div class="col-md-4">
+              <label>Año vencimiento</label>
+              <input type="text" name="aniovencimiento" id="anio" class="form-control" pattern="\d{4}" title="Ej: 2028" required>
+            </div>
+            <div class="col-md-4">
+              <label>CVV</label>
+              <input type="text" name="cvv" id="cvv" class="form-control" pattern="\d{3,4}" required>
+            </div>
+          </div>
+          <div class="mb-3 mt-3">
+            <label>Dirección</label>
+            <textarea name="direccion" required class="form-control"></textarea>
+          </div>
+          <div class="mb-3">
+            <label>Ciudad</label>
+            <input type="text" name="ciudad" required class="form-control">
+          </div>
+          <div class="mb-3">
+            <label>Documento de Identidad</label>
+            <input type="text" name="dui" required class="form-control">
+          </div>
+          <div class="mb-3">
+            <label>Monto</label>
+            <input type="number" name="monto" class="form-control" min="1" step="0.01" required>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Pagar ahora</button>
+      </div>
+    </form>
+    </div>
+  </div>
+</div>
+<!-- Fin Modal Pago Directo -->
+
+<!-- Modal éxito enlace -->
 <div class="modal fade" id="pagoExitoModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -129,39 +177,128 @@
 
 {% if pago_ok and pago_url %}
 <script>
-    window.open("{{ pago_url }}", "_blank");
-    var modal = new bootstrap.Modal(document.getElementById("pagoExitoModal"));
-    modal.show();
+  window.open("{{ pago_url }}", "_blank");
+  var modal = new bootstrap.Modal(document.getElementById("pagoExitoModal"));
+  modal.show();
 </script>
 {% endif %}
 
 <script>
+  // abre el selector de pago
+  document.getElementById("pagoSelectorBtn").addEventListener("click", function() {
+    var modal = new bootstrap.Modal(document.getElementById("selectorPagoModal"));
+    modal.show();
+  });
+
+  document.getElementById("botonPagoDirecto").addEventListener("click", function() {
+    var modal = bootstrap.Modal.getInstance(document.getElementById("selectorPagoModal"));
+    modal.hide();
+    var modalDirecto = new bootstrap.Modal(document.getElementById("pagoDirectoModal"));
+    modalDirecto.show();
+  });
+
+  document.getElementById("botonPagoLink").addEventListener("click", function() {
+    var modal = bootstrap.Modal.getInstance(document.getElementById("selectorPagoModal"));
+    modal.hide();
+    var modalLink = new bootstrap.Modal(document.getElementById("pagoModal"));
+    modalLink.show();
+  });
+
+  // validaciones pago link
   document.getElementById("pagoForm").addEventListener("submit", function(e) {
     const nombre = this.nombre.value.trim();
     const correo = this.correo.value.trim();
     const monto = parseFloat(this.monto.value);
 
     if (nombre.length < 3) {
-      alert("Por favor, ingresa un nombre válido (mínimo 3 caracteres).");
+      alert("Nombre muy corto.");
       e.preventDefault();
       return;
     }
-
     if (!correo.includes("@")) {
-      alert("Por favor, ingresa un correo válido.");
+      alert("Correo inválido.");
       e.preventDefault();
       return;
     }
-
     if (isNaN(monto) || monto <= 0) {
-      alert("El monto debe ser mayor a cero.");
+      alert("Monto inválido.");
       e.preventDefault();
       return;
     }
-
-    // mostrar spinner
     document.getElementById("pagoSpinner").classList.remove("d-none");
   });
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const form = document.getElementById("pagoFormDirecto");
+    form.addEventListener("submit", function(e) {
+        let valid = true;
+
+        // Limpiar mensajes previos
+        document.querySelectorAll(".invalid-feedback").forEach(el => el.remove());
+        document.querySelectorAll(".is-invalid").forEach(el => el.classList.remove("is-invalid"));
+
+        const nombre = form.nombre.value.trim();
+        const apellido = form.apellido.value.trim();
+        const monto = parseFloat(form.monto.value);
+        const mes = form.mesvencimiento.value.trim();
+        const anio = form.aniovencimiento.value.trim();
+        const numtarjeta = form.numtarjeta.value.trim();
+        const cvv = form.cvv.value.trim();
+
+        if (nombre.length < 3) {
+            marcarError(form.nombre, "El nombre debe tener al menos 3 caracteres.");
+            valid = false;
+        }
+
+        if (apellido.length < 3) {
+            marcarError(form.apellido, "El apellido debe tener al menos 3 caracteres.");
+            valid = false;
+        }
+
+        if (isNaN(monto) || monto < 1) {
+            marcarError(form.monto, "El monto mínimo es $1.");
+            valid = false;
+        }
+
+        if (!/^\d{2}$/.test(mes) || parseInt(mes) < 1 || parseInt(mes) > 12) {
+            marcarError(form.mesvencimiento, "El mes debe ser dos dígitos (01–12).");
+            valid = false;
+        }
+
+        if (!/^\d{4}$/.test(anio)) {
+            marcarError(form.aniovencimiento, "El año debe ser de cuatro dígitos (ej. 2028).");
+            valid = false;
+        }
+
+        if (!/^\d{12,19}$/.test(numtarjeta)) {
+            marcarError(form.numtarjeta, "El número de tarjeta debe tener entre 12 y 19 dígitos.");
+            valid = false;
+        }
+
+        if (!/^\d{3,4}$/.test(cvv)) {
+            marcarError(form.cvv, "El CVV debe ser de 3 o 4 dígitos.");
+            valid = false;
+        }
+
+        if (!valid) {
+            e.preventDefault();
+        } else {
+            // spinner
+            document.getElementById("pagoSpinnerDirecto").classList.remove("d-none");
+        }
+    });
+
+    function marcarError(input, mensaje) {
+        input.classList.add("is-invalid");
+        const div = document.createElement("div");
+        div.className = "invalid-feedback";
+        div.textContent = mensaje;
+        input.parentNode.appendChild(div);
+    }
+});
 </script>
 
 

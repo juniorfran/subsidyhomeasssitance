@@ -1,0 +1,60 @@
+{% extends "home.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+        
+            {% if es_aprobada %}
+            <div class="alert alert-success text-center">
+                <h3 class="mb-3">✅ ¡Pago aprobado exitosamente!</h3>
+                <p>Tu transacción fue procesada correctamente.</p>
+            </div>
+            {% else %}
+            <div class="alert alert-warning text-center">
+                <h3 class="mb-3">⚠️ Pago en revisión</h3>
+                <p>Tu pago no está aprobado todavía o está pendiente de confirmación.</p>
+            </div>
+            {% endif %}
+            
+            <div class="card mt-4 shadow">
+                <div class="card-header bg-primary text-white">
+                    <strong>Resumen de la transacción</strong>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <strong>ID Transacción:</strong> {{ transaccion3ds_respuesta.idTransaccion }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Monto:</strong> ${{ transaccion3ds_respuesta.monto }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Estado:</strong> 
+                            {% if es_aprobada %}
+                                Aprobada
+                            {% else %}
+                                Pendiente
+                            {% endif %}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Fecha de registro:</strong> {{ transaccion_compra.fecha_creacion|date:"d/m/Y H:i" }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>URL 3DS:</strong> 
+                            <a href="{{ transaccion3ds_respuesta.urlCompletarPago3Ds }}" target="_blank">
+                                Completar autenticación 3DS
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'home' %}" class="btn btn-primary">Volver al inicio</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
