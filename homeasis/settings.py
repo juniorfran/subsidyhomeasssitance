@@ -47,6 +47,21 @@ INSTALLED_APPS = [
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
+
+
+ALLOWED_HOSTS = [
+    'xsoporte.incoe.cloud',
+    '127.0.0.1:8000',
+    '127.0.0.1',
+    '192.168.2.49'
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://xsoporte.incoe.cloud",
+    "http://xsoporte.incoe.cloud",
+]
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
