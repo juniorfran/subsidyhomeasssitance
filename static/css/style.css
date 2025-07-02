@@ -4,6 +4,7 @@
     --secondary: #FFC448;
     --light: #FAFAFB;
     --dark: #12141D;
+    --gray-border: #ced4da;
 }
 
 .back-to-top {
@@ -97,7 +98,7 @@
 }
 
 @media (max-width: 991.98px) {
-    .navbar .navbar-nav .nav-link  {
+    .navbar .navbar-nav .nav-link {
         padding: 10px 0;
     }
 }
@@ -427,4 +428,27 @@
 
 .testimonial-carousel .owl-dot.active::after {
     background: var(--primary);
+}
+
+
+.datepicker table tr td span.active, .datepicker table tr td span.active.disabled, .datepicker table tr td span.active.disabled:hover, .datepicker table tr td span.active:hover {
+    background-image: linear-gradient(to bottom, #6244C5, #6244C5)!important;
+}
+
+.toggleCvvClass{
+    border-color: var(--gray-border)!important;
+}
+
+.cvv-toggle-invalid {
+  border-color: #dc3545 !important;
+  border-top-color: #dc3545 !important;
+  border-bottom-color: #dc3545 !important;
+  border-left-color: #dc3545 !important;
+  border-bottom-right-radius: 10px !important;
+  border-top-right-radius: 10px !important;
+}
+
+.group-button-icon {
+    background-color: transparent !important;
+    border-right: none !important;
 }

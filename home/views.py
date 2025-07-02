@@ -579,9 +579,14 @@ def transaccion3ds_compra(request):
                 )
 
                 # Registra la compra
-                TransaccionCompra3DS.objects.create(
-                    transaccion3ds=transaccion3ds,
-                    transaccion3ds_respuesta=transaccion3ds_respuesta,
+                # TransaccionCompra3DS.objects.create(
+                #     transaccion3ds=transaccion3ds,
+                #     transaccion3ds_respuesta=transaccion3ds_respuesta,
+                #     #cliente=cliente,
+                #     #acceso=None,
+                # )
+                
+
                     #cliente=cliente,
                 )
 
