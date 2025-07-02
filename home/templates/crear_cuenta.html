@@ -1,0 +1,63 @@
+{% extends "home.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2>Crear Cuenta Business Moov</h2>
+  {% if error %}
+  <div class="alert alert-danger">{{ error }}</div>
+  {% endif %}
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label>Nombre legal de la empresa</label>
+      <input type="text" name="legal_name" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label>Email</label>
+      <input type="email" name="email" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label>Teléfono</label>
+      <input type="text" name="phone" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label>Dirección</label>
+      <input type="text" name="address_line1" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label>Dirección 2</label>
+      <input type="text" name="address_line2" class="form-control">
+    </div>
+    <div class="mb-3">
+      <label>Ciudad</label>
+      <input type="text" name="city" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label>Estado (2 letras)</label>
+      <input type="text" name="state" class="form-control" required maxlength="2">
+    </div>
+    <div class="mb-3">
+      <label>Código postal</label>
+      <input type="text" name="postal_code" class="form-control" required maxlength="5">
+    </div>
+    <div class="mb-3">
+      <label>País</label>
+      <input type="text" name="country" class="form-control" value="US">
+    </div>
+    <div class="mb-3">
+      <label>Website</label>
+      <input type="url" name="website" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label>EIN (Tax ID)</label>
+      <input type="text" name="ein_number" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label>Dominio de aceptación (opcional)</label>
+      <input type="url" name="accepted_domain" class="form-control">
+    </div>
+    <button type="submit" class="btn btn-primary">Crear Cuenta</button>
+  </form>
+</div>
+{% endblock %}

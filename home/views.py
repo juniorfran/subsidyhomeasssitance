@@ -1,10 +1,11 @@
 import base64
+from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponse, JsonResponse
 import requests
-from .models import Clientes, ContactMessage, Service, PaymentLink, MoovConfig, Transaccion3DS, Transaccion3DS_Respuesta, TransaccionCompra3DS, wompi_config
+from .models import Clientes, ContactMessage, MoovBusinessAccount, Service, PaymentLink, MoovConfig, Transaccion3DS, Transaccion3DS_Respuesta, TransaccionCompra3DS, wompi_config
 from django.views import View
 from django.contrib import messages
 
@@ -227,6 +228,149 @@ def contacto(request):
 
     return redirect(reverse("home"))
 
+def crear_cuenta_business(request):
+    if request.method == "POST":
+        legal_name = request.POST.get("legal_name")
+        email = request.POST.get("email")
+        phone = request.POST.get("phone")
+        address_line1 = request.POST.get("address_line1")
+        address_line2 = request.POST.get("address_line2")
+        city = request.POST.get("city")
+        state = request.POST.get("state")
+        postal_code = request.POST.get("postal_code")
+        country = request.POST.get("country", "US")
+        website = request.POST.get("website")
+        ein_number = request.POST.get("ein_number")
+
+        accepted_ip = request.META.get("REMOTE_ADDR", "0.0.0.0")
+        accepted_user_agent = request.META.get("HTTP_USER_AGENT", "unknown")
+        accepted_date = timezone.now()
+
+        print("=== DATOS RECIBIDOS DEL FORMULARIO ===")
+        print(f"legal_name: {legal_name}")
+        print(f"email: {email}")
+        print(f"phone: {phone}")
+        print(f"address_line1: {address_line1}")
+        print(f"city: {city}")
+        print(f"state: {state}")
+        print(f"postal_code: {postal_code}")
+        print(f"country: {country}")
+        print(f"website: {website}")
+        print(f"ein_number: {ein_number}")
+        print("=====================================")
+
+        try:
+            with Moov(
+                x_moov_version="v2024.01.00",
+                security=components.Security(
+                    username=settings.MOOV_CLIENT_ID,
+                    password=settings.MOOV_CLIENT_SECRET,
+                ),
+            ) as moov:
+                payload = {
+                    "account_type": components.CreateAccountType.BUSINESS,
+                    "profile": components.CreateProfile(
+                        business=components.CreateBusinessProfile(
+                            legal_business_name=legal_name or "Mi Empresa S.A. de C.V.",
+                            email=email or "soporte@miempresa.com",
+                            phone={"number": phone or "5551234567", "country_code": "1"},
+                            address={
+                                "address_line1": address_line1 or "Av. Siempre Viva 123",
+                                "address_line2": address_line2 or "",
+                                "city": city or "San Salvador",
+                                "state_or_province": state or "SS",
+                                "postal_code": postal_code or "1101",
+                                "country": country or "US"
+                            },
+                            type="LLC",
+                            website=website or "https://miempresa.com",
+                            description="Mi Empresa dedicada a servicios tecnológicos"
+                        )
+                    ),
+                    "metadata": {
+                        "cliente_interno": "mi_id_123"
+                    },
+                    "terms_of_service": {
+                        "accepted_date": accepted_date.isoformat(),
+                        "accepted_ip": accepted_ip,
+                        "accepted_user_agent": accepted_user_agent,
+                        "accepted_domain": request.get_host(),
+                    },
+                    "customer_support": {
+                        "phone": {
+                            "number": phone or "5551234567",
+                            "country_code": "1",
+                        },
+                        "email": email or "soporte@miempresa.com",
+                        "address": {
+                            "address_line1": address_line1 or "Av. Siempre Viva 123",
+                            "address_line2": address_line2 or "",
+                            "city": city or "San Salvador",
+                            "state_or_province": state or "SS",
+                            "postal_code": postal_code or "1101",
+                            "country": country or "US"
+                        },
+                    },
+                    "settings": {
+                        "card_payment": {
+                            "statement_descriptor": "MiEmpresa",
+                        },
+                        "ach_payment": {
+                            "company_name": "MiEmpresa"
+                        },
+                    }
+                }
+
+                print("=== PAYLOAD ENVIADO A MOOV ===")
+                print(payload)
+                print("===================================")
+
+                res = moov.accounts.create(**payload)
+
+                print("=== RESPUESTA DE MOOV ===")
+                print(res)
+                print("===============================")
+
+                account_id = res.result.account_id
+
+                moov.accounts.request_capabilities(
+                    account_id=account_id,
+                    request_body=[
+                        components.CapabilityName.TRANSFERS,
+                        components.CapabilityName.SEND_FUNDS,
+                        components.CapabilityName.COLLECT_FUNDS,
+                        components.CapabilityName.WALLET,
+                    ]
+                )
+
+                MoovBusinessAccount.objects.create(
+                    legal_name=legal_name,
+                    email=email,
+                    phone=phone,
+                    address_line1=address_line1,
+                    address_line2=address_line2,
+                    city=city,
+                    state=state,
+                    postal_code=postal_code,
+                    country=country,
+                    website=website,
+                    ein_number=ein_number,
+                    accepted_ip=accepted_ip,
+                    accepted_user_agent=accepted_user_agent,
+                    accepted_date=accepted_date,
+                    moov_account_id=account_id,
+                )
+
+                return redirect("cuenta_exitosa")
+
+        except Exception as e:
+            print("=== ERROR DE MOOV ===")
+            print(f"{e}")
+            print("=======================")
+            return render(request, "crear_cuenta.html", {"error": str(e)})
+
+    return render(request, "crear_cuenta.html")
+
 
 #################### TRANSACCION 3DS WOMPI #######################
 
@@ -352,7 +496,7 @@ def crear_transaccion_3ds(numeroTarjeta, cvv, mesVencimiento, anioVencimiento, m
             monto=transaccion_data["monto"]
         )
         
-        return transaccion_data
+        return transaccion3ds, transaccion3ds_respuesta, transaccion_data
     
     
     
@@ -380,13 +524,9 @@ def transaccion3ds_compra(request):
     Procesa un pago 3DS sin asociarlo a un producto/acceso, solo registrando
     los datos del cliente y la transacción.
     """
-    # Cargar configuración de Wompi
     wompi_config = get_wompi_config()
     Client_id = wompi_config.client_id
     Client_secret = wompi_config.client_secret
-
-    # Obtener token
-    access_token = authenticate_wompi(Client_id, Client_secret)
 
     if request.method == 'POST':
         nombre = request.POST.get('nombre')
@@ -410,9 +550,8 @@ def transaccion3ds_compra(request):
 
         try:
             with transaction.atomic():
-                # Crear la transacción 3DS
-                transaccion_data = crear_transaccion_3ds(
-                    #acceso_id=None,  # no hay producto asociado
+                # llamar a crear_transaccion_3ds que ya crea y devuelve las instancias
+                transaccion3ds, transaccion3ds_respuesta, transaccion_data = crear_transaccion_3ds(
                     numeroTarjeta=str(numtarjeta),
                     cvv=str(cvv),
                     mesVencimiento=mesvencimiento,
@@ -429,32 +568,7 @@ def transaccion3ds_compra(request):
                 )
                 print(transaccion_data)
 
-                # Guarda la transacción local
-                transaccion3ds = Transaccion3DS.objects.create(
-                    #acceso=None,
-                    numeroTarjeta=numtarjeta,
-                    mesVencimiento=mesvencimiento,
-                    anioVencimiento=aniovencimiento,
-                    cvv=cvv,
-                    monto=monto,
-                    nombre=nombre,
-                    apellido=apellido,
-                    email=email,
-                    ciudad=ciudad,
-                    direccion=direccion,
-                    telefono=telefono,
-                )
-
-                # Respuesta 3DS
-                transaccion3ds_respuesta = Transaccion3DS_Respuesta.objects.create(
-                    transaccion3ds=transaccion3ds,
-                    idTransaccion=transaccion_data.get("idTransaccion", ""),
-                    esReal=transaccion_data.get("esReal", True),
-                    urlCompletarPago3Ds=transaccion_data.get("urlCompletarPago3Ds", ""),
-                    monto=monto
-                )
-
-                # Crea cliente
+                # ya NO vuelvas a crear la transacción, solo registra el cliente
                 cliente = Clientes.objects.create(
                     nombre=nombre,
                     apellido=apellido,
@@ -472,13 +586,18 @@ def transaccion3ds_compra(request):
                 #     #acceso=None,
                 # )
                 
+
+                    #cliente=cliente,
+                )
+
+                # crea la compra
                 compra = TransaccionCompra3DS.objects.create(
                     transaccion3ds=transaccion3ds,
                     transaccion3ds_respuesta=transaccion3ds_respuesta,
                 )
+                print(f"DEBUG - Se creó TransaccionCompra3DS con id: {compra.id}")
 
-
-                # redirigir para confirmar
+                # redirige con el id correcto
                 return redirect('transaccion3ds_exitosa', transaccion3ds_id=compra.id)
 
         except Exception as e:
@@ -487,8 +606,8 @@ def transaccion3ds_compra(request):
                 "error_message": str(e)
             })
 
-    # si es GET
     return redirect('home')
+
 
     
 # Nueva vista para mostrar el mensaje de éxito

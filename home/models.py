@@ -86,6 +86,26 @@ class ContactMessage(models.Model):
     def __str__(self):
         return f"{self.nombre} ({self.email}) - {self.asunto}"
     
+class MoovBusinessAccount(models.Model):
+    legal_name = models.CharField(max_length=150)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20)
+    address_line1 = models.CharField(max_length=60)
+    address_line2 = models.CharField(max_length=32, blank=True, null=True)
+    city = models.CharField(max_length=32)
+    state = models.CharField(max_length=2)
+    postal_code = models.CharField(max_length=5)
+    country = models.CharField(max_length=2, default="US")
+    website = models.URLField()
+    ein_number = models.CharField(max_length=15)
+    accepted_ip = models.GenericIPAddressField()
+    accepted_user_agent = models.TextField()
+    accepted_date = models.DateTimeField()
+    moov_account_id = models.CharField(max_length=255, blank=True, null=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.legal_name
 
 ##############3 wompi models tansaccion 3ds ####################
 
