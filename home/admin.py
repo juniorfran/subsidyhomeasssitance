@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ContactMessage, Service, PaymentLink, MoovConfig
+from .models import ContactMessage, MoovBusinessAccount, Service, PaymentLink, MoovConfig
 
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
@@ -81,3 +81,8 @@ class Transaccion3DSRespuestaAdmin(admin.ModelAdmin):
 class TransaccionCompra3DSAdmin(admin.ModelAdmin):
     list_display = ("transaccion3ds", "transaccion3ds_respuesta", "estado", "fecha_creacion")
     readonly_fields = ("fecha_creacion", "fecha_modificacion")
+
+@admin.register(MoovBusinessAccount)
+class MoovBusinessAccountAdmin(admin.ModelAdmin):
+    list_display = ["legal_name", "moov_account_id", "fecha_creacion"]
+    search_fields = ["legal_name", "email"]

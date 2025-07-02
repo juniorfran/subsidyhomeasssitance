@@ -1,0 +1,12 @@
+{% extends "home.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="alert alert-success">
+    <h4>¡Cuenta creada correctamente!</h4>
+    <p>La cuenta de empresa ha sido registrada en Moov y guardada en el sistema.</p>
+  </div>
+  <a href="{% url 'home' %}" class="btn btn-primary">Volver al inicio</a>
+</div>
+{% endblock %}
