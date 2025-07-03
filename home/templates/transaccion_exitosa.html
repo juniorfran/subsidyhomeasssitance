@@ -14,7 +14,7 @@
             {% else %}
             <div class="alert alert-warning text-center">
                 <h3 class="mb-3">⚠️ Pago en revisión</h3>
-                <p>Una vez completes el proceso en la ventana emergente, esta página se actualizará automáticamente</p>
+                <p>Una vez completes el proceso en la ventana emergente, esta página se actualizará automáticamente.</p>
                 <p>Si no se actualiza, recarga la página manualmente.</p>
             </div>
             {% endif %}
@@ -43,10 +43,16 @@
                             <strong>Fecha de registro:</strong> {{ transaccion_compra.fecha_creacion|date:"d/m/Y H:i" }}
                         </li>
                         <li class="list-group-item">
-                            <strong>URL 3DS:</strong> 
-                            <a href="{{ transaccion3ds_respuesta.urlCompletarPago3Ds }}" target="_blank">
-                                Completar autenticación 3DS
-                            </a>
+                            <strong>Autenticación 3DS:</strong> 
+                            {% if es_aprobada %}
+                                <button id="revisarPagoBtn" class="btn btn-success">
+                                    Revisar Pago
+                                </button>
+                            {% else %}
+                                <a href="{{ transaccion3ds_respuesta.urlCompletarPago3Ds }}" target="_blank">
+                                    Completar autenticación 3DS
+                                </a>
+                            {% endif %}
                         </li>
                     </ul>
                 </div>
@@ -80,9 +86,20 @@
         }
 
         const btn = document.getElementById("confirmarTransaccionBtn");
-        btn.addEventListener("click", function() {
-            window.open(url3DS, "_blank");
-            location.reload();
+        if (btn) {
+            btn.addEventListener("click", function() {
+                window.open(url3DS, "_blank");
+                location.reload();
+            });
+        }
+    });
+</script>
+{% elif es_aprobada and transaccion3ds_respuesta.urlCompletarPago3Ds %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const revisarBtn = document.getElementById("revisarPagoBtn");
+        revisarBtn.addEventListener("click", function() {
+            window.open("{{ transaccion3ds_respuesta.urlCompletarPago3Ds }}", "_blank");
         });
     });
 </script>
