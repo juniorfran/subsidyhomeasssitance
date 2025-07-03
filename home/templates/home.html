@@ -100,6 +100,23 @@
     </div>
     <!-- Copyright End -->
 
+    <!-- Modal informativo -->
+<div class="modal fade" id="modalInfoPago" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Pagos pendientes</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p class="fs-5">Tienes pagos pendientes, realiza tu pago de forma segura en nuestra página web.</p>
+        <button class="btn btn-success btn-lg mt-3" id="btnContinuarPago">Continuar con el pago</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
     <!-- Back to Top -->
     <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
@@ -125,6 +142,18 @@
     <script src="{% static "js/main.js" %}"></script>
 
     <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var infoModal = new bootstrap.Modal(document.getElementById("modalInfoPago"));
+            infoModal.show();
+
+            document.getElementById("btnContinuarPago").addEventListener("click", function () {
+                infoModal.hide();
+                var selectorModal = new bootstrap.Modal(document.getElementById("selectorPagoModal"));
+                selectorModal.show();
+            });
+        });
+
 document.addEventListener("DOMContentLoaded", function () {
     $('#aniovencimiento').datepicker({
         format: "yyyy",
