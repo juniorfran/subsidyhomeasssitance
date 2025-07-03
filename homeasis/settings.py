@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-@__qv)*_=3n-9py0)crfc3($zshn+@h#qlwx$54xm(@+_a)6uk
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS=['*']
 
 
 # Application definition
@@ -53,12 +53,15 @@ ALLOWED_HOSTS = [
     'xsoporte.incoe.cloud',
     '127.0.0.1:8000',
     '127.0.0.1',
-    '192.168.2.49'
+    '192.168.2.49',
+    'xsoporte.contaspro.cloud'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://xsoporte.incoe.cloud",
     "http://xsoporte.incoe.cloud",
+    "https://xsoporte.contaspro.cloud",
+    "http://xsoporte.contaspro.cloud",
 ]
 
 
