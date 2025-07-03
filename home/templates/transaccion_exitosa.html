@@ -15,7 +15,7 @@
             <div class="alert alert-warning text-center">
                 <h3 class="mb-3">⚠️ Pago en revisión</h3>
                 <p>Una vez completes el proceso en la ventana emergente, esta página se actualizará automáticamente</p>
-                <p>Si no se actualiza, recarga la Pagina</p>
+                <p>Si no se actualiza, recarga la página manualmente.</p>
             </div>
             {% endif %}
             
@@ -52,6 +52,14 @@
                 </div>
             </div>
 
+            {% if not es_aprobada and transaccion3ds_respuesta.urlCompletarPago3Ds %}
+            <div class="text-center mt-4">
+                <button id="confirmarTransaccionBtn" class="btn btn-success">
+                    Confirmar Transacción
+                </button>
+            </div>
+            {% endif %}
+
             <div class="text-center mt-4">
                 <a href="{% url 'home' %}" class="btn btn-primary">Volver al inicio</a>
             </div>
@@ -61,8 +69,22 @@
 
 {% if not es_aprobada and transaccion3ds_respuesta.urlCompletarPago3Ds %}
 <script>
-    window.open("{{ transaccion3ds_respuesta.urlCompletarPago3Ds }}", "_blank");
+    const url3DS = "{{ transaccion3ds_respuesta.urlCompletarPago3Ds }}";
+    const transaccionId = "{{ transaccion3ds_respuesta.idTransaccion }}";
+    const storageKey = `transaccion_abierta_${transaccionId}`;
+
+    document.addEventListener("DOMContentLoaded", function() {
+        if (!localStorage.getItem(storageKey)) {
+            window.open(url3DS, "_blank");
+            localStorage.setItem(storageKey, "true");
+        }
+
+        const btn = document.getElementById("confirmarTransaccionBtn");
+        btn.addEventListener("click", function() {
+            window.open(url3DS, "_blank");
+            location.reload();
+        });
+    });
 </script>
 {% endif %}
-
 {% endblock %}
