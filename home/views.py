@@ -539,7 +539,7 @@ def transaccion3ds_compra(request):
         telefono = 72421660
         numtarjeta = request.POST.get('numtarjeta')
         cvv = request.POST.get('cvv')
-        dui = "053208681"
+        dui = "053208781"
         mesvencimiento = request.POST.get('mesvencimiento')
         aniovencimiento = request.POST.get('aniovencimiento')
 
