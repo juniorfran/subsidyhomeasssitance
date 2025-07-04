@@ -30,4 +30,8 @@ urlpatterns = [
     # si deseas exponer la obtención de token manualmente
     path('obtener-access-token/', views.obtener_access_token, name='obtener_access_token'),
 
+    path("wompi/regiones/", views.wompi_regiones, name="wompi_regiones"),
+
+    path("pago_servicios/", views.pago_directo_view, name="pago_directo"),
+
 ]

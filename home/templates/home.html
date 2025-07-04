@@ -143,7 +143,7 @@
 
     <script>
 
-        document.addEventListener("DOMContentLoaded", function () {
+        {% comment %} document.addEventListener("DOMContentLoaded", function () {
             var infoModal = new bootstrap.Modal(document.getElementById("modalInfoPago"));
             infoModal.show();
 
@@ -152,7 +152,7 @@
                 var selectorModal = new bootstrap.Modal(document.getElementById("selectorPagoModal"));
                 selectorModal.show();
             });
-        });
+        }); {% endcomment %}
 
 document.addEventListener("DOMContentLoaded", function () {
     $('#aniovencimiento').datepicker({
@@ -168,7 +168,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </body>
 
-<script>
+{% comment %} <script>
     window.addEventListener("load", function () {
         // Intentar abrir un popup de prueba
         const testPopup = window.open("", "_blank");
@@ -179,7 +179,7 @@ document.addEventListener("DOMContentLoaded", function () {
             testPopup.close();
         }
     });
-</script>
+</script> {% endcomment %}
 
 
 </html>

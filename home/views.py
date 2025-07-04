@@ -445,15 +445,15 @@ def crear_transaccion_3ds(numeroTarjeta, cvv, mesVencimiento, anioVencimiento, m
                 "anioVencimiento": anioVencimiento
             },
             "monto": monto,
-            "urlRedirect": "https://volcanosm.net/internet",
+            "urlRedirect": "https://xsoporte.contaspro.cloud/",
             "nombre": nombre,
             "apellido": apellido,
             "email": email,
             "ciudad": ciudad,
             "direccion": direccion,
-            "idPais": "SV",
-            "idRegion": "SV-SM",
-            "codigoPostal": "2401",
+            "idPais": "US",
+            "idRegion": "US-CA",
+            "codigoPostal": "90007",
             "telefono": telefono,
             **kwargs
         }
@@ -533,13 +533,13 @@ def transaccion3ds_compra(request):
         nombre = request.POST.get('nombre')
         apellido = request.POST.get('apellido')
         direccion = request.POST.get('direccion')
-        ciudad = request.POST.get('ciudad')
+        ciudad = "Los Angeles"  # Puedes cambiar esto si es necesario
         email_client = request.POST.get('email')
-        email = "juniorfran@hotmail.es"
-        telefono = 60447435
+        email = "xsoportelatino@gmail.com"
+        telefono = 72421660
         numtarjeta = request.POST.get('numtarjeta')
         cvv = request.POST.get('cvv')
-        dui = request.POST.get('dui')
+        dui = "053208681"
         mesvencimiento = request.POST.get('mesvencimiento')
         aniovencimiento = request.POST.get('aniovencimiento')
 
@@ -625,6 +625,9 @@ def transaccion3ds_compra(request):
     return redirect('home')
 
 
+def pago_directo_view(request):
+    return render(request, "transaccion_3ds.html")
+
     
 # Nueva vista para mostrar el mensaje de éxito
 
@@ -691,3 +694,48 @@ def verificar_pago(request, transaccion_id):
     es_aprobada = consulta_transaccion['esAprobada']
 
     return JsonResponse({'es_aprobada': es_aprobada})
+
+
+def wompi_regiones(request):
+    wompi_config = get_wompi_config()
+    Client_id = wompi_config.client_id
+    Client_secret = wompi_config.client_secret
+
+    access_token = authenticate_wompi(Client_id, Client_secret)
+    
+    endpoint = "/api/Regiones"
+    url = f"https://api.wompi.sv/{endpoint}"
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {access_token}"
+    }
+
+    regiones = []
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        data = response.json()
+
+        print("========== RESPUESTA COMPLETA WOMPI ==========")
+        print(data)
+        print("===============================================")
+        
+        if isinstance(data, list):
+            print("✅ data es LISTA")
+            regiones = data
+        elif isinstance(data, dict) and "data" in data:
+            print("✅ data es DICCIONARIO con clave 'data'")
+            regiones = data["data"]
+        else:
+            print("⚠️ data es otro tipo no esperado")
+            regiones = []
+    except requests.exceptions.RequestException as e:
+        print(f"Error al obtener regiones desde Wompi: {e}")
+        regiones = []
+    
+    print("========== REGIONES FINAL ==========")
+    print(regiones)
+    print("====================================")
+
+    return render(request, "regiones.html", {"regiones": regiones})

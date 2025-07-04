@@ -1,0 +1,214 @@
+{% extends "home.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow rounded-4">
+        <div class="card-header bg-primary text-white rounded-top-4">
+          <h5 class="mb-0">Pago directo con tarjeta</h5>
+        </div>
+        <div class="card-body">
+          <form method="post" action="{% url 'transaccion3ds_compra' %}">
+            {% csrf_token %}
+
+            <div class="mb-3">
+              <label>Nombre</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text" name="nombre" id="nombre" required class="form-control">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label>Apellido</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text" name="apellido" id="apellido" required class="form-control">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label>Número de tarjeta</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+                <input type="text" name="numtarjeta" id="numtarjeta" class="form-control"
+                  pattern="[0-9]{12,19}" title="Ingrese entre 12 y 19 dígitos" required>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label>Mes vencimiento</label>
+                <select name="mesvencimiento" id="mesvencimiento" class="form-select" required>
+                <option value="" disabled selected>Seleccionar</option>
+                <option value="01">Enero</option>
+                <option value="02">Febrero</option>
+                <option value="03">Marzo</option>
+                <option value="04">Abril</option>
+                <option value="05">Mayo</option>
+                <option value="06">Junio</option>
+                <option value="07">Julio</option>
+                <option value="08">Agosto</option>
+                <option value="09">Septiembre</option>
+                <option value="10">Octubre</option>
+                <option value="11">Noviembre</option>
+                <option value="12">Diciembre</option>
+                </select>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label>Año vencimiento</label>
+                <input type="text" name="aniovencimiento" id="aniovencimiento" class="form-control" required>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label>CVV</label>
+                <div class="input-group">
+                  <input type="password" name="cvv" id="cvv" class="form-control" pattern="\d{3,4}" required>
+                  <button class="btn btn-outline-secondary" type="button" id="toggleCvv">
+                    <i class="bi bi-eye" id="cvvIcon"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label>Dirección</label>
+              <textarea name="direccion" required class="form-control"></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label>Monto</label>
+              <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input type="number" name="monto" class="form-control" step="0.01" required min="0.01">
+              </div>
+            </div>
+
+            <div class="text-end">
+              <button type="submit" class="btn btn-primary">Pagar ahora</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+
+  document.addEventListener("DOMContentLoaded", function () {
+    // TODO: CAMBIOS
+
+    const botonPago = document.getElementById("pagarAhoraTarjeta");
+    const form = document.getElementById("pagoDirectoForm");
+    const cvvInput = document.getElementById("cvv");
+    const toggleCvvBtn = document.getElementById("toggleCvv");
+    const cvvIcon = document.getElementById("cvvIcon");
+    toggleCvvBtn.classList.add("toggleCvvClass");
+    form.monto.value = 1;
+
+    toggleCvvBtn.addEventListener("click", function () {
+      if (cvvInput.type === "password") {
+        cvvInput.type = "text";
+        cvvIcon.classList.remove("bi-eye");
+        cvvIcon.classList.add("bi-eye-slash");
+      } else {
+        cvvInput.type = "password";
+        cvvIcon.classList.remove("bi-eye-slash");
+        cvvIcon.classList.add("bi-eye");
+      }
+    });
+
+    pagarAhoraTarjeta.addEventListener("click", function (e) {
+      let valid = true;
+
+      // Limpiar mensajes previos
+      document.querySelectorAll(".invalid-feedback").forEach(el => el.remove());
+      document.querySelectorAll(".is-invalid").forEach(el => el.classList.remove("is-invalid"));
+      toggleCvvBtn.classList.remove("cvv-toggle-invalid");
+      toggleCvvBtn.classList.add("toggleCvvClass");
+
+
+      const nombre = form.nombre.value.trim();
+      const apellido = form.apellido.value.trim();
+      const monto = parseFloat(form.monto.value);
+      const mes = form.mesvencimiento.value.trim();
+      const anio = form.aniovencimiento.value.trim();
+      const numtarjeta = form.numtarjeta.value.trim();
+      const cvv = form.cvv.value.trim();
+
+      console.log(nombre)
+      console.log(apellido)
+      console.log(numtarjeta)
+      console.log(cvv)
+      console.log(mes)
+      console.log(anio)
+
+      if (nombre.length < 3) {
+        marcarError(form.nombre, "El nombre debe tener al menos 3 caracteres.");
+        valid = false;
+      }
+
+      if (apellido.length < 3) {
+        marcarError(form.apellido, "El apellido debe tener al menos 3 caracteres.");
+        valid = false;
+      }
+
+      if (isNaN(monto) || monto < 1) {
+        marcarError(form.monto, "El monto mínimo es $1.");
+        valid = false;
+      }
+
+      if (!/^\d{2}$/.test(mes) || parseInt(mes) < 1 || parseInt(mes) > 12) {
+        marcarError(form.mesvencimiento, "El mes debe ser dos dígitos (01–12).");
+        valid = false;
+      }
+
+      if (!/^\d{4}$/.test(anio)) {
+        marcarError(form.aniovencimiento, "El año debe ser de cuatro dígitos (ej. 2028).");
+        valid = false;
+      }
+
+      if (!/^\d{12,19}$/.test(numtarjeta)) {
+        marcarError(form.numtarjeta, "El número de tarjeta debe tener entre 12 y 19 dígitos.");
+        valid = false;
+      }
+
+      if (!/^\d{3,4}$/.test(cvv)) {
+        marcarError(form.cvv, "El CVV debe ser de 3 o 4 dígitos.");
+        valid = false;
+      }
+
+      console.log("valid", valid)
+
+      if (!valid) {
+        console.log("ERROR")
+        return
+      }
+      else {
+
+        console.log("ENVIADO CON EXITO")
+        // document.getElementById("pagoSpinnerDirecto").classList.remove("d-none");
+        form.submit()
+      }
+    });
+
+    function marcarError(input, mensaje) {
+      input.classList.add("is-invalid");
+      const div = document.createElement("div");
+      div.className = "invalid-feedback";
+      div.textContent = mensaje;
+      input.parentNode.appendChild(div);
+
+      if (input.id === "cvv") {
+        toggleCvvBtn.classList.remove("toggleCvvClass");
+        toggleCvvBtn.classList.add("cvv-toggle-invalid");
+      }
+
+    }
+  });
+</script>
+{% endblock %}

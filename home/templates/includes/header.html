@@ -176,7 +176,7 @@
             <label>Dirección</label>
             <textarea name="direccion" required class="form-control"></textarea>
           </div>
-          <div class="mb-3">
+          {% comment %} <div class="mb-3">
             <label>Ciudad</label>
             <div class="input-group">
               <div class="input-group-text group-button-icon">
@@ -190,8 +190,8 @@
               </div>
               <input type="text" name="ciudad" required class="form-control">
             </div>
-          </div>
-          <div class="mb-3">
+          </div> {% endcomment %}
+          {% comment %} <div class="mb-3">
             <label>Documento de Identidad</label>
             <div class="input-group">
               <div class="input-group-text group-button-icon">
@@ -205,7 +205,7 @@
               </div>
               <input type="text" name="dui" required class="form-control">
             </div>
-          </div>
+          </div> {% endcomment %}
           <div class="mb-3">
             <label>Monto</label>
             <div class="input-group">
@@ -259,8 +259,7 @@
 <script>
   // abre el selector de pago
   document.getElementById("pagoSelectorBtn").addEventListener("click", function () {
-    var modal = new bootstrap.Modal(document.getElementById("selectorPagoModal"));
-    modal.show();
+    window.open("{% url 'pago_directo' %}", "_blank");
 
     const cvvInput = document.getElementById("cvv");
     cvvInput.addEventListener("input", function () {

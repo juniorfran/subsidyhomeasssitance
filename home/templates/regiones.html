@@ -1,0 +1,24 @@
+{% extends "home.html" %}
+{% load static %}
+
+{% block content %}
+  <div class="container mt-5">
+    <h2>Regiones obtenidas desde Wompi</h2>
+    <ul class="list-group">
+      {% for region in regiones %}
+        <li class="list-group-item">
+          <strong>{{ region.nombre }}</strong> (código: {{ region.id }})
+          {% if region.territorios %}
+            <ul>
+              {% for territorio in region.territorios %}
+                <li>
+                  {{ territorio.nombre }} (código: {{ territorio.id }})
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endblock %}
