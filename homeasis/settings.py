@@ -54,6 +54,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1:8000',
     '127.0.0.1',
     '192.168.2.49',
+    '192.168.1.40',
     'xsoporte.contaspro.cloud'
 ]
 
@@ -62,6 +63,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://xsoporte.incoe.cloud",
     "https://xsoporte.contaspro.cloud",
     "http://xsoporte.contaspro.cloud",
+    "https://192.168.1.40:8686",
+    "http://192.168.1.40:8686",
 ]
 
 
