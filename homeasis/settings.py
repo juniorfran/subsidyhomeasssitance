@@ -67,6 +67,9 @@ CSRF_TRUSTED_ORIGINS = [
     "http://192.168.1.40:8686",
 ]
 
+CSRF_COOKIE_SECURE = True   # si solo usa HTTPS
+CSRF_COOKIE_HTTPONLY = False  # debe estar en False si quiere acceder desde JS
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

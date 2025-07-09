@@ -137,18 +137,25 @@
       }
 
       // PASO FINAL: enviamos el formulario con fetch y redirigimos al 3DS
+      function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+      }
+
       btnNext.disabled = true;
       btnNext.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Procesando...';
 
       try {
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const csrfToken = getCookie('csrftoken');
         const response = await fetch("{% url 'transaccion3ds_compra' %}", {
           method: 'POST',
           headers: {
             'X-CSRFToken': csrfToken,
             'Accept': 'application/json'
           },
-          body: new FormData(form)
+          body: new FormData(form),
+          credentials: 'same-origin'  // muy importante para que se envíen las cookies en el fetch
         });
         const data = await response.json();
 
