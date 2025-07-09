@@ -27,9 +27,7 @@ def home(request):
         "pago_ok": pago_ok
     })
 
-
 ####### SDK ##########
-
 def moov_sdk_auth(request):
     """
     Vista funcional para probar autenticación con el SDK de Moov
@@ -53,7 +51,6 @@ def moov_sdk_auth(request):
             return JsonResponse(res.dict(), safe=False)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-
 
 def obtener_access_token(request):
     """
@@ -91,7 +88,6 @@ def obtener_access_token(request):
             "status": response.status_code,
             "response": response.text
         }, status=500)
-
 
 def crear_pago(request):
     if request.method == "POST":
@@ -166,7 +162,6 @@ def crear_pago(request):
 
     print("⚠️ Solicitud GET recibida en crear_pago, redirigiendo al home")
     return redirect(reverse("home"))
-
 
 def moov_sdk_list_accounts(request):
     accounts = []
@@ -411,7 +406,6 @@ def authenticate_wompi(client_id, client_secret):
         print(f"Error during authentication: {e}")
         return None
 
-
 def get_wompi_config():
 
     try:
@@ -420,95 +414,158 @@ def get_wompi_config():
     except wompi_config.DoesNotExist:
         raise ImproperlyConfigured("No se encontro ninguna configuración de Wompi en la base de datos")
 
+# def crear_transaccion_3ds(numeroTarjeta, cvv, mesVencimiento, anioVencimiento, monto, nombre, apellido, email, ciudad, direccion, telefono, client_id, client_secret, **kwargs):
+    
+#     # Cargar la configuración de Wompi
+#     wompi_config = get_wompi_config()
+#     Client_id = wompi_config.client_id
+#     Client_secret = wompi_config.client_secret
 
-def crear_transaccion_3ds(numeroTarjeta, cvv, mesVencimiento, anioVencimiento, monto, nombre, apellido, email, ciudad, direccion, telefono, client_id, client_secret, **kwargs):
+#     # Autenticarse y obtener el token
+#     access_token = authenticate_wompi(Client_id, Client_secret)
     
-    # Cargar la configuración de Wompi
-    wompi_config = get_wompi_config()
-    Client_id = wompi_config.client_id
-    Client_secret = wompi_config.client_secret
+#     if not access_token:
+#         print("Error: No se pudo obtener el token de acceso")
+#         return None
+    
+#     try:
+#         # Construir la solicitud JSON
+#         request_data = {
+#             "tarjetaCreditoDebido": {
+#                 "numeroTarjeta": numeroTarjeta,
+#                 "cvv": cvv,
+#                 "mesVencimiento": mesVencimiento,
+#                 "anioVencimiento": anioVencimiento
+#             },
+#             "monto": monto,
+#             "urlRedirect": "https://xsoporte.contaspro.cloud/",
+#             "nombre": nombre,
+#             "apellido": apellido,
+#             "email": email,
+#             "ciudad": ciudad,
+#             "direccion": direccion,
+#             "idPais": "US",
+#             "idRegion": "US-CA",
+#             "codigoPostal": "90007",
+#             "telefono": telefono,
+#             **kwargs
+#         }
+#         # Log request data
+#         print("Request Data:", request_data)
+        
+#         # Realizar la solicitud POST para la transacción 3DS
+#         response = requests.post("https://api.wompi.sv/TransaccionCompra/3Ds", json=request_data, headers=get_wompi_headers(access_token))
+#         response.raise_for_status()
+#         transaccion_data = response.json()
+        
+#         # Log response status and content
+#         print("Response Status Code:", response.status_code)
+#         if response.content:
+#             print("Response Content:", response.content)
+#         else:
+#             print("Response content is empty")
+        
+#         # Guardar la información de la transacción en la base de datos
+#         transaccion3ds = Transaccion3DS.objects.create(
+#             #cliente=get_object_or_404(Clientes, pk=client_id),  # Asumiendo que `client_id` es el ID del cliente
+#             numeroTarjeta=numeroTarjeta,
+#             mesVencimiento=mesVencimiento,
+#             anioVencimiento=anioVencimiento,
+#             cvv=cvv,
+#             monto=monto,
+#             nombre=nombre,
+#             apellido=apellido,
+#             email=email,
+#             ciudad=ciudad,
+#             direccion=direccion,
+#             telefono=telefono,
+#             estado=True
+#         )
+        
+#         transaccion3ds_respuesta = Transaccion3DS_Respuesta.objects.create(
+#             transaccion3ds=transaccion3ds,
+#             idTransaccion=transaccion_data["idTransaccion"],
+#             esReal=transaccion_data["esReal"],
+#             urlCompletarPago3Ds=transaccion_data["urlCompletarPago3Ds"],
+#             monto=transaccion_data["monto"]
+#         )
+        
+#         return transaccion3ds, transaccion3ds_respuesta, transaccion_data
+    
+    
+    
+#     except requests.exceptions.RequestException as e:
+#         print(f"Error during POST request: {e}")
+#         if e.response is not None:
+#             if e.response.content:
+#                 print(f"Response content: {e.response.content}")
+#             else:
+#                 print("Error: Response content is empty")
+#         return None
 
-    # Autenticarse y obtener el token
-    access_token = authenticate_wompi(Client_id, Client_secret)
-    
-    if not access_token:
-        print("Error: No se pudo obtener el token de acceso")
-        return None
-    
-    try:
-        # Construir la solicitud JSON
-        request_data = {
-            "tarjetaCreditoDebido": {
-                "numeroTarjeta": numeroTarjeta,
-                "cvv": cvv,
-                "mesVencimiento": mesVencimiento,
-                "anioVencimiento": anioVencimiento
-            },
-            "monto": monto,
-            "urlRedirect": "https://xsoporte.contaspro.cloud/",
-            "nombre": nombre,
-            "apellido": apellido,
-            "email": email,
-            "ciudad": ciudad,
-            "direccion": direccion,
-            "idPais": "US",
-            "idRegion": "US-CA",
-            "codigoPostal": "90007",
-            "telefono": telefono,
-            **kwargs
+
+
+def crear_transaccion_3ds(
+        numeroTarjeta, cvv, mesVencimiento, anioVencimiento, monto,
+        nombre, apellido, email, ciudad, direccion, telefono,
+        access_token, url_redirect):
+    """
+    Llama al API 3DS de Wompi y guarda Transaccion3DS + Respuesta.
+    """
+    request_data = {
+        "tarjetaCreditoDebido": {
+            "numeroTarjeta": numeroTarjeta,
+            "cvv": cvv,
+            "mesVencimiento": mesVencimiento,
+            "anioVencimiento": anioVencimiento
+        },
+        "monto": monto,
+        # <-- aquí inyectamos la URL a la que Wompi volverá tras 3DS
+        "urlRedirect": url_redirect,
+        "nombre": nombre,
+        "apellido": apellido,
+        "email": email,
+        "ciudad": ciudad,
+        "direccion": direccion,
+        "idPais": "US",
+        "idRegion": "US-CA",
+        "codigoPostal": "90007",
+        "telefono": telefono
+    }
+    response = requests.post(
+        "https://api.wompi.sv/TransaccionCompra/3Ds",
+        json=request_data,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {access_token}"
         }
-        # Log request data
-        print("Request Data:", request_data)
-        
-        # Realizar la solicitud POST para la transacción 3DS
-        response = requests.post("https://api.wompi.sv/TransaccionCompra/3Ds", json=request_data, headers=get_wompi_headers(access_token))
-        response.raise_for_status()
-        transaccion_data = response.json()
-        
-        # Log response status and content
-        print("Response Status Code:", response.status_code)
-        if response.content:
-            print("Response Content:", response.content)
-        else:
-            print("Response content is empty")
-        
-        # Guardar la información de la transacción en la base de datos
-        transaccion3ds = Transaccion3DS.objects.create(
-            #cliente=get_object_or_404(Clientes, pk=client_id),  # Asumiendo que `client_id` es el ID del cliente
-            numeroTarjeta=numeroTarjeta,
-            mesVencimiento=mesVencimiento,
-            anioVencimiento=anioVencimiento,
-            cvv=cvv,
-            monto=monto,
-            nombre=nombre,
-            apellido=apellido,
-            email=email,
-            ciudad=ciudad,
-            direccion=direccion,
-            telefono=telefono,
-            estado=True
-        )
-        
-        transaccion3ds_respuesta = Transaccion3DS_Respuesta.objects.create(
-            transaccion3ds=transaccion3ds,
-            idTransaccion=transaccion_data["idTransaccion"],
-            esReal=transaccion_data["esReal"],
-            urlCompletarPago3Ds=transaccion_data["urlCompletarPago3Ds"],
-            monto=transaccion_data["monto"]
-        )
-        
-        return transaccion3ds, transaccion3ds_respuesta, transaccion_data
-    
-    
-    
-    except requests.exceptions.RequestException as e:
-        print(f"Error during POST request: {e}")
-        if e.response is not None:
-            if e.response.content:
-                print(f"Response content: {e.response.content}")
-            else:
-                print("Error: Response content is empty")
-        return None
+    )
+    response.raise_for_status()
+    data = response.json()
+
+    # Persistimos Transaccion3DS y su respuesta
+    trans = Transaccion3DS.objects.create(
+        numeroTarjeta=numeroTarjeta,
+        mesVencimiento=mesVencimiento,
+        anioVencimiento=anioVencimiento,
+        cvv=cvv,
+        monto=monto,
+        nombre=nombre,
+        apellido=apellido,
+        email=email,
+        ciudad=ciudad,
+        direccion=direccion,
+        telefono=telefono,
+        estado=True
+    )
+    resp = Transaccion3DS_Respuesta.objects.create(
+        transaccion3ds=trans,
+        idTransaccion=data["idTransaccion"],
+        esReal=data["esReal"],
+        urlCompletarPago3Ds=data["urlCompletarPago3Ds"],
+        monto=data["monto"]
+    )
+    return trans, resp, data
 
 
 def get_wompi_headers(access_token):
@@ -517,149 +574,210 @@ def get_wompi_headers(access_token):
         'Authorization': f'Bearer {access_token}'
     }
 
-
 #Transaccion comprar acceso
+# def transaccion3ds_compra(request):
+#     """
+#     Procesa un pago 3DS sin asociarlo a un producto/acceso, solo registrando
+#     los datos del cliente y la transacción.
+#     """
+#     wompi_config = get_wompi_config()
+#     Client_id = wompi_config.client_id
+#     Client_secret = wompi_config.client_secret
+
+#     if request.method == 'POST':
+#         nombre = request.POST.get('nombre')
+#         apellido = request.POST.get('apellido')
+#         direccion = request.POST.get('direccion')
+#         ciudad = "Los Angeles"  # Puedes cambiar esto si es necesario
+#         email_client = request.POST.get('email')
+#         email = "xsoportelatino@gmail.com"
+#         telefono = 72421660
+#         numtarjeta = request.POST.get('numtarjeta')
+#         cvv = request.POST.get('cvv')
+#         dui = "053208781"
+#         mesvencimiento = request.POST.get('mesvencimiento')
+#         aniovencimiento = request.POST.get('aniovencimiento')
+
+#         monto = float(request.POST.get('monto', 1))
+
+#         if monto <= 0:
+#             return render(request, 'pago_fallido.html', {
+#                 "error_message": "El monto debe ser mayor a 0"
+#             })
+
+#         try:
+#             with transaction.atomic():
+#                 # llamar a crear_transaccion_3ds que ya crea y devuelve las instancias
+#                 transaccion3ds, transaccion3ds_respuesta, transaccion_data = crear_transaccion_3ds(
+#                     numeroTarjeta=str(numtarjeta),
+#                     cvv=str(cvv),
+#                     mesVencimiento=mesvencimiento,
+#                     anioVencimiento=aniovencimiento,
+#                     monto=monto,
+#                     nombre=nombre,
+#                     apellido=apellido,
+#                     email=email,
+#                     ciudad=ciudad,
+#                     direccion=direccion,
+#                     telefono=telefono,
+#                     client_id=Client_id,
+#                     client_secret=Client_secret
+#                 )
+#                 print(transaccion_data)
+
+#                 # ya NO vuelvas a crear la transacción, solo registra el cliente
+#                 cliente = Clientes.objects.create(
+#                     nombre=nombre,
+#                     apellido=apellido,
+#                     direccion=direccion,
+#                     dui=dui,
+#                     email=email,
+#                     telefono=telefono,
+#                 )
+
+#                 # Registra la compra
+#                 TransaccionCompra3DS.objects.create(
+#                     transaccion3ds=transaccion3ds,
+#                     transaccion3ds_respuesta=transaccion3ds_respuesta,
+#                     #cliente=cliente,
+#                 )
+
+#                 # crea la compra
+#                 compra = TransaccionCompra3DS.objects.create(
+#                     transaccion3ds=transaccion3ds,
+#                     transaccion3ds_respuesta=transaccion3ds_respuesta,
+#                 )
+#                 print(f"DEBUG - Se creó TransaccionCompra3DS con id: {compra.id}")
+
+#                 # -------- ENVIAR CORREO DE CONFIRMACIÓN ------------
+#                 asunto = "Confirmación de pago - X Soporte Latino"
+#                 mensaje = (
+#                     f"Estimado {nombre} {apellido},\n\n"
+#                     f"Gracias por realizar su pago de ${monto:.2f}.\n"
+#                     f"Su referencia de transacción es: {transaccion3ds_respuesta.idTransaccion}.\n\n"
+#                     f"Saludos,\n"
+#                     f"Equipo de X Soporte Latino"
+#                 )
+#                 send_mail(
+#                     subject=asunto,
+#                     message=mensaje,
+#                     from_email="xsoportelatino@gmail.com",
+#                     recipient_list=[email_client],
+#                     fail_silently=False,
+#                 )
+#                 print(f"Correo de confirmación enviado a {email_client}")
+#                 # -----------------------------------------------------
+
+#                 # redirige con el id correcto
+#                 return redirect('transaccion3ds_exitosa', transaccion3ds_id=compra.id)
+
+#         except Exception as e:
+#             print(f"Error en transacción 3DS: {e}")
+#             return render(request, 'pago_fallido.html', {
+#                 "error_message": str(e)
+#             })
+
+#     return redirect('home')
 
 def transaccion3ds_compra(request):
-    """
-    Procesa un pago 3DS sin asociarlo a un producto/acceso, solo registrando
-    los datos del cliente y la transacción.
-    """
-    wompi_config = get_wompi_config()
-    Client_id = wompi_config.client_id
-    Client_secret = wompi_config.client_secret
+    if request.method != "POST":
+        return redirect("home")
 
-    if request.method == 'POST':
-        nombre = request.POST.get('nombre')
-        apellido = request.POST.get('apellido')
-        direccion = request.POST.get('direccion')
-        ciudad = "Los Angeles"  # Puedes cambiar esto si es necesario
-        email_client = request.POST.get('email')
-        email = "xsoportelatino@gmail.com"
-        telefono = 72421660
-        numtarjeta = request.POST.get('numtarjeta')
-        cvv = request.POST.get('cvv')
-        dui = "053208781"
-        mesvencimiento = request.POST.get('mesvencimiento')
-        aniovencimiento = request.POST.get('aniovencimiento')
+    # 1) Recolectar datos del formulario
+    nombre       = request.POST["nombre"]
+    apellido     = request.POST["apellido"]
+    direccion    = request.POST["direccion"]
+    ciudad       = "Los Angeles"
+    email        = "xsoportelatino@gmail.com"
+    telefono     = "72421660"
+    numtarjeta   = request.POST["numtarjeta"].replace(" ", "")
+    cvv          = request.POST["cvv"]
+    mes          = request.POST["mesvencimiento"]
+    anio         = request.POST["aniovencimiento"]
+    monto        = float(request.POST.get("monto", 1))
 
-        monto = float(request.POST.get('monto', 1))
+    if monto <= 0:
+        return render(request, "pago_fallido.html", {"error_message": "Monto inválido"})
 
-        if monto <= 0:
-            return render(request, 'pago_fallido.html', {
-                "error_message": "El monto debe ser mayor a 0"
-            })
+    # 2) Autenticación Wompi
+    cfg = get_wompi_config()
+    token = authenticate_wompi(cfg.client_id, cfg.client_secret)
 
-        try:
-            with transaction.atomic():
-                # llamar a crear_transaccion_3ds que ya crea y devuelve las instancias
-                transaccion3ds, transaccion3ds_respuesta, transaccion_data = crear_transaccion_3ds(
-                    numeroTarjeta=str(numtarjeta),
-                    cvv=str(cvv),
-                    mesVencimiento=mesvencimiento,
-                    anioVencimiento=aniovencimiento,
-                    monto=monto,
-                    nombre=nombre,
-                    apellido=apellido,
-                    email=email,
-                    ciudad=ciudad,
-                    direccion=direccion,
-                    telefono=telefono,
-                    client_id=Client_id,
-                    client_secret=Client_secret
-                )
-                print(transaccion_data)
+    # 3) Construir la URL de retorno (mismo endpoint success sin ID)
+    url_redirect = "https://xsoporte.contaspro.cloud/pago-directo/exitoso/"
 
-                # ya NO vuelvas a crear la transacción, solo registra el cliente
-                cliente = Clientes.objects.create(
-                    nombre=nombre,
-                    apellido=apellido,
-                    direccion=direccion,
-                    dui=dui,
-                    email=email,
-                    telefono=telefono,
-                )
+    # 4) Llamar al API 3DS y guardar Transaccion3DS + Respuesta
+    trans, resp, data = crear_transaccion_3ds(
+        numeroTarjeta=numtarjeta,
+        cvv=cvv,
+        mesVencimiento=mes,
+        anioVencimiento=anio,
+        monto=monto,
+        nombre=nombre,
+        apellido=apellido,
+        email=email,
+        ciudad=ciudad,
+        direccion=direccion,
+        telefono=telefono,
+        access_token=token,
+        url_redirect=url_redirect
+    )
 
-                # Registra la compra
-                TransaccionCompra3DS.objects.create(
-                    transaccion3ds=transaccion3ds,
-                    transaccion3ds_respuesta=transaccion3ds_respuesta,
-                    #cliente=cliente,
-                )
+    # 5) Crear el registro de compra UNA VEZ que ya existen trans y resp
+    with transaction.atomic():
+        cliente = Clientes.objects.create(
+            nombre=nombre,
+            apellido=apellido,
+            direccion=direccion,
+            email=email,
+            telefono=telefono
+        )
+        compra = TransaccionCompra3DS.objects.create(
+            transaccion3ds=trans,
+            transaccion3ds_respuesta=resp,
+            #cliente=cliente
+        )
 
-                # crea la compra
-                compra = TransaccionCompra3DS.objects.create(
-                    transaccion3ds=transaccion3ds,
-                    transaccion3ds_respuesta=transaccion3ds_respuesta,
-                )
-                print(f"DEBUG - Se creó TransaccionCompra3DS con id: {compra.id}")
-
-                # -------- ENVIAR CORREO DE CONFIRMACIÓN ------------
-                asunto = "Confirmación de pago - X Soporte Latino"
-                mensaje = (
-                    f"Estimado {nombre} {apellido},\n\n"
-                    f"Gracias por realizar su pago de ${monto:.2f}.\n"
-                    f"Su referencia de transacción es: {transaccion3ds_respuesta.idTransaccion}.\n\n"
-                    f"Saludos,\n"
-                    f"Equipo de X Soporte Latino"
-                )
-                send_mail(
-                    subject=asunto,
-                    message=mensaje,
-                    from_email="xsoportelatino@gmail.com",
-                    recipient_list=[email_client],
-                    fail_silently=False,
-                )
-                print(f"Correo de confirmación enviado a {email_client}")
-                # -----------------------------------------------------
-
-                # redirige con el id correcto
-                return redirect('transaccion3ds_exitosa', transaccion3ds_id=compra.id)
-
-        except Exception as e:
-            print(f"Error en transacción 3DS: {e}")
-            return render(request, 'pago_fallido.html', {
-                "error_message": str(e)
-            })
-
-    return redirect('home')
+    # 6) Devolver al JS la URL de 3DS para redirigir al emisor
+    return JsonResponse({
+        "url3ds": resp.urlCompletarPago3Ds
+    })
 
 
 def pago_directo_view(request):
     return render(request, "transaccion_3ds.html")
 
-    
 # Nueva vista para mostrar el mensaje de éxito
+def transaccion3ds_exitosa(request):
+    # Wompi redirige a .../exitoso/?idTransaccion=<uuid>&otros=params
+    id_transac = request.GET.get('idTransaccion')
+    if not id_transac:
+        return render(request, 'pago_fallido.html', {
+            'error_message': 'No se recibió el identificador de transacción.'
+        })
 
-def transaccion3ds_exitosa(request, transaccion3ds_id):
+    # 1) Buscamos la respuesta Wompi
+    resp = get_object_or_404(Transaccion3DS_Respuesta, idTransaccion=id_transac)
 
-    transaccion3ds_compra = get_object_or_404(TransaccionCompra3DS, pk=transaccion3ds_id)
-    #tipo_acceso = transaccion3ds_compra.acceso.acceso_tipo
-    
-    #acceso = transaccion3ds_compra.acceso
-    transaccion3ds_respuesta = transaccion3ds_compra.transaccion3ds_respuesta
-    #cliente = transaccion3ds_compra.cliente
+    # 2) Encontramos la TransaccionCompra3DS que tenga esa respuesta
+    compra = get_object_or_404(TransaccionCompra3DS,
+                               transaccion3ds_respuesta=resp)
 
-    idtransac = transaccion3ds_respuesta.idTransaccion
-    consulta_transaccion = consultar_transaccion_3ds(idtransac)
-    es_aprobada = consulta_transaccion.get('esAprobada', False)
+    # 3) Verificamos si aprobó
+    consulta = consultar_transaccion_3ds(id_transac)
+    es_aprobada = consulta.get('esAprobada', False)
 
-    context = {
-        'transaccion_compra': transaccion3ds_compra,
-        #'cliente': cliente,
-        'transaccion3ds_respuesta': transaccion3ds_respuesta,
+    return render(request, 'transaccion_exitosa.html', {
+        'transaccion_compra': compra,
+        'transaccion3ds_respuesta': resp,
         'es_aprobada': es_aprobada,
-        'consulta_transaccion': consulta_transaccion,
-    }
-    
-    return render(request, 'transaccion_exitosa.html', context)
-
+        'consulta_transaccion': consulta,
+    })
 
 def transaccion3ds_fallida(request):
 
     
     return render(request, 'pago_fallido.html')
-
 
 def consultar_transaccion_3ds(id_transaccion):
     # Cargar la configuración de Wompi
@@ -694,7 +812,6 @@ def verificar_pago(request, transaccion_id):
     es_aprobada = consulta_transaccion['esAprobada']
 
     return JsonResponse({'es_aprobada': es_aprobada})
-
 
 def wompi_regiones(request):
     wompi_config = get_wompi_config()

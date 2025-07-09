@@ -19,7 +19,7 @@ urlpatterns = [
     path('pago-directo/', views.transaccion3ds_compra, name='transaccion3ds_compra'),
 
     # resultado exitoso de la transacción 3DS
-    path('pago-directo/exitoso/<int:transaccion3ds_id>/', views.transaccion3ds_exitosa, name='transaccion3ds_exitosa'),
+    path('pago-directo/exitoso/', views.transaccion3ds_exitosa, name='transaccion3ds_exitosa'),
 
     # resultado fallido
     path('pago-directo/fallido/', views.transaccion3ds_fallida, name='transaccion3ds_fallida'),
