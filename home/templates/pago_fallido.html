@@ -1,4 +1,3 @@
-
 {% extends "home.html" %}
 
 {% block content %}
@@ -6,9 +5,17 @@
     <div class="container pt-5 pb-3">
         <div class="row justify-content-center">
             <div class="col-lg-8 col-md-10 mb-4 text-center">
-                <h1>No se pudo completar el pago por favor, verifica el saldo de tu cuenta o intenta con otra tarjeta.</h1>
-                <p>{{ error_message }}</p>
-                <a href="/" class="btn btn-primary">Intentar de nuevo</a>
+                <h1 class="mb-4">No se pudo completar el pago</h1>
+                <p class="lead">
+                    Por favor, verifica el saldo de tu cuenta o intenta con otra tarjeta.
+                </p>
+                {% if error_message %}
+                  <div class="alert alert-danger mt-4">
+                    <strong>Detalle técnico:</strong><br>
+                    {{ error_message }}
+                  </div>
+                {% endif %}
+                <a href="/" class="btn btn-primary mt-3">Intentar de nuevo</a>
             </div>
         </div>
     </div>

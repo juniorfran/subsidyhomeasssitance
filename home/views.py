@@ -504,14 +504,43 @@ def get_wompi_config():
 #         return None
 
 
-
 def crear_transaccion_3ds(
-        numeroTarjeta, cvv, mesVencimiento, anioVencimiento, monto,
-        nombre, apellido, email, ciudad, direccion, telefono,
-        access_token, url_redirect):
+    numeroTarjeta, cvv, mesVencimiento, anioVencimiento, monto,
+    nombre, apellido, email, ciudad, direccion, telefono,
+    url_redirect
+):
     """
-    Llama al API 3DS de Wompi y guarda Transaccion3DS + Respuesta.
+    Crea la transacción 3DS en Wompi y maneja errores HTTP comunes y de red.
+    Devuelve: (trans, resp, data) o lanza excepción con mensaje detallado.
     """
+
+    # 1. Obtener credenciales del modelo wompi_config
+    try:
+        config = wompi_config.objects.latest('created_at')
+        client_id     = config.client_id
+        client_secret = config.client_secret
+    except Exception as e:
+        raise Exception(f"❌ Error obteniendo configuración Wompi: {e}")
+
+    # 2. Autenticación
+    access_token = authenticate_wompi(client_id, client_secret)
+    if not access_token:
+        raise Exception("❌ No se pudo obtener el token de acceso desde Wompi (¿Credenciales erróneas o API inalcanzable?).")
+
+    # 3. Validar datos antes de enviar
+    # Campos raíz
+    campos_raiz = ["monto", "nombre", "apellido", "email", "ciudad", "direccion", "telefono"]
+    for campo in campos_raiz:
+        if not locals()[campo]:
+            raise ValueError(f"El campo {campo} es obligatorio y no puede estar vacío")
+    # Campos tarjeta
+    for campo in ["numeroTarjeta", "cvv", "mesVencimiento", "anioVencimiento"]:
+        if not locals()[campo]:
+            raise ValueError(f"El campo {campo} es obligatorio y no puede estar vacío")
+    if float(monto) <= 0:
+        raise ValueError("El monto debe ser mayor a 0")
+
+    # 4. Preparar payload y headers
     request_data = {
         "tarjetaCreditoDebido": {
             "numeroTarjeta": numeroTarjeta,
@@ -520,7 +549,6 @@ def crear_transaccion_3ds(
             "anioVencimiento": anioVencimiento
         },
         "monto": monto,
-        # <-- aquí inyectamos la URL a la que Wompi volverá tras 3DS
         "urlRedirect": url_redirect,
         "nombre": nombre,
         "apellido": apellido,
@@ -532,40 +560,77 @@ def crear_transaccion_3ds(
         "codigoPostal": "90007",
         "telefono": telefono
     }
-    response = requests.post(
-        "https://api.wompi.sv/TransaccionCompra/3Ds",
-        json=request_data,
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {access_token}"
-        }
-    )
-    response.raise_for_status()
-    data = response.json()
 
-    # Persistimos Transaccion3DS y su respuesta
-    trans = Transaccion3DS.objects.create(
-        numeroTarjeta=numeroTarjeta,
-        mesVencimiento=mesVencimiento,
-        anioVencimiento=anioVencimiento,
-        cvv=cvv,
-        monto=monto,
-        nombre=nombre,
-        apellido=apellido,
-        email=email,
-        ciudad=ciudad,
-        direccion=direccion,
-        telefono=telefono,
-        estado=True
-    )
-    resp = Transaccion3DS_Respuesta.objects.create(
-        transaccion3ds=trans,
-        idTransaccion=data["idTransaccion"],
-        esReal=data["esReal"],
-        urlCompletarPago3Ds=data["urlCompletarPago3Ds"],
-        monto=data["monto"]
-    )
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {access_token}"
+    }
+
+    # 5. Llamar a la API de Wompi con manejo de errores robusto
+    try:
+        response = requests.post(
+            "https://api.wompi.sv/TransaccionCompra/3Ds",
+            json=request_data,
+            headers=headers,
+            timeout=15
+        )
+    except requests.exceptions.Timeout:
+        raise Exception("⏱️ La solicitud a Wompi ha excedido el tiempo de espera (timeout).")
+    except requests.exceptions.ConnectionError:
+        raise Exception("🔌 No hay conexión con la API de Wompi. ¿Problema de red o la API no responde?")
+    except requests.exceptions.RequestException as e:
+        raise Exception(f"❌ Error general de conexión con Wompi: {e}")
+
+    # 6. Procesar la respuesta HTTP
+    if response.status_code == 200:
+        data = response.json()
+        # Verificar que esté todo lo necesario
+        if "idTransaccion" not in data or "urlCompletarPago3Ds" not in data:
+            raise Exception("⚠️ Respuesta de Wompi incompleta: falta 'idTransaccion' o 'urlCompletarPago3Ds'")
+    elif response.status_code == 400:
+        raise Exception(f"❌ [400] Solicitud incorrecta: {response.text}")
+    elif response.status_code == 401:
+        raise Exception(f"🔒 [401] No autorizado. Token inválido o credenciales incorrectas: {response.text}")
+    elif response.status_code == 403:
+        raise Exception(f"🚫 [403] Acceso prohibido: {response.text}")
+    elif response.status_code == 404:
+        raise Exception(f"🔎 [404] API Wompi no encontrada o endpoint incorrecto: {response.text}")
+    elif response.status_code == 422:
+        raise Exception(f"❌ [422] Entidad no procesable (campos inválidos): {response.text}")
+    elif response.status_code >= 500:
+        raise Exception(f"🛑 [5xx] Error interno del servidor Wompi. Puede estar en mantenimiento o con problemas: {response.text}")
+    else:
+        raise Exception(f"⚠️ [HTTP {response.status_code}] Respuesta inesperada de Wompi: {response.text}")
+
+    # 7. Guardar en base de datos
+    try:
+        trans = Transaccion3DS.objects.create(
+            numeroTarjeta=numeroTarjeta,
+            mesVencimiento=mesVencimiento,
+            anioVencimiento=anioVencimiento,
+            cvv=cvv,
+            monto=monto,
+            nombre=nombre,
+            apellido=apellido,
+            email=email,
+            ciudad=ciudad,
+            direccion=direccion,
+            telefono=telefono,
+            estado=True
+        )
+        resp = Transaccion3DS_Respuesta.objects.create(
+            transaccion3ds=trans,
+            idTransaccion=data["idTransaccion"],
+            esReal=data["esReal"],
+            urlCompletarPago3Ds=data["urlCompletarPago3Ds"],
+            monto=data["monto"]
+        )
+    except Exception as e:
+        raise Exception(f"❌ Error guardando transacción en la base de datos: {e}")
+
+    # 8. Retornar lo necesario
     return trans, resp, data
+
 
 
 def get_wompi_headers(access_token):
@@ -678,70 +743,117 @@ def get_wompi_headers(access_token):
 #             })
 
 #     return redirect('home')
+from django.views.decorators.csrf import csrf_exempt
 
+@csrf_exempt
 def transaccion3ds_compra(request):
     if request.method != "POST":
         return redirect("home")
 
-    # 1) Recolectar datos del formulario
-    nombre       = request.POST["nombre"]
-    apellido     = request.POST["apellido"]
-    direccion    = request.POST["direccion"]
-    ciudad       = "Los Angeles"
-    email        = "xsoportelatino@gmail.com"
-    telefono     = "72421660"
-    numtarjeta   = request.POST["numtarjeta"].replace(" ", "")
-    cvv          = request.POST["cvv"]
-    mes          = request.POST["mesvencimiento"]
-    anio         = request.POST["aniovencimiento"]
-    monto        = float(request.POST.get("monto", 1))
+      # 1) Recolectar datos del formulario
+    try:
+        nombre       = request.POST["nombre"]
+        apellido     = request.POST["apellido"]
+        direccion    = request.POST["direccion"]
+        ciudad       = "Los Angeles"
+        email        = "xsoportelatino@gmail.com"
+        telefono     = "72421660"
+        numtarjeta   = request.POST["numtarjeta"].replace(" ", "")
+        cvv          = request.POST["cvv"]
+        mes          = request.POST["mesvencimiento"]
+        anio         = request.POST["aniovencimiento"]
+        monto        = float(request.POST.get("monto", 1))
+    except Exception as e:
+        return JsonResponse({
+            "error": f"Error recolectando datos del formulario: {e}"
+        }, status=400)
 
     if monto <= 0:
-        return render(request, "pago_fallido.html", {"error_message": "Monto inválido"})
+        return JsonResponse({
+            "error": "Monto inválido. Debe ser mayor a 0."
+        }, status=400)
 
     # 2) Autenticación Wompi
-    cfg = get_wompi_config()
-    token = authenticate_wompi(cfg.client_id, cfg.client_secret)
+    try:
+        cfg = wompi_config.objects.latest('created_at')
+        token = authenticate_wompi(cfg.client_id, cfg.client_secret)
+        if not token:
+            raise Exception("No se pudo obtener el token de acceso desde Wompi. Verifique sus credenciales o intente más tarde.")
+    except Exception as e:
+        return JsonResponse({
+            "error": f"Error de autenticación con Wompi: {e}"
+        }, status=502)
 
-    # 3) Construir la URL de retorno (mismo endpoint success sin ID)
     url_redirect = "https://xsoporte.contaspro.cloud/pago-directo/exitoso/"
 
-    # 4) Llamar al API 3DS y guardar Transaccion3DS + Respuesta
-    trans, resp, data = crear_transaccion_3ds(
-        numeroTarjeta=numtarjeta,
-        cvv=cvv,
-        mesVencimiento=mes,
-        anioVencimiento=anio,
-        monto=monto,
-        nombre=nombre,
-        apellido=apellido,
-        email=email,
-        ciudad=ciudad,
-        direccion=direccion,
-        telefono=telefono,
-        access_token=token,
-        url_redirect=url_redirect
-    )
-
-    # 5) Crear el registro de compra UNA VEZ que ya existen trans y resp
-    with transaction.atomic():
-        cliente = Clientes.objects.create(
+    # 3) Llamar al API 3DS y guardar Transaccion3DS + Respuesta
+    try:
+        trans, resp, data = crear_transaccion_3ds(
+            numeroTarjeta=numtarjeta,
+            cvv=cvv,
+            mesVencimiento=mes,
+            anioVencimiento=anio,
+            monto=monto,
             nombre=nombre,
             apellido=apellido,
-            direccion=direccion,
             email=email,
-            telefono=telefono
+            ciudad=ciudad,
+            direccion=direccion,
+            telefono=telefono,
+            url_redirect=url_redirect
         )
-        compra = TransaccionCompra3DS.objects.create(
-            transaccion3ds=trans,
-            transaccion3ds_respuesta=resp,
-            #cliente=cliente
-        )
+    except ValueError as ve:
+        return JsonResponse({
+            "error": str(ve)
+        }, status=400)
+    except requests.exceptions.Timeout:
+        return JsonResponse({
+            "error": "La solicitud a Wompi excedió el tiempo de espera (timeout). Por favor intenta de nuevo."
+        }, status=504)
+    except requests.exceptions.ConnectionError:
+        return JsonResponse({
+            "error": "No hay conexión con la API de Wompi. Puede ser un problema temporal de red."
+        }, status=503)
+    except requests.exceptions.HTTPError as err:
+        # Errores HTTP específicos
+        status_code = err.response.status_code if err.response else 500
+        detail = ""
+        try:
+            detail = err.response.json().get('error', err.response.text)
+        except Exception:
+            detail = err.response.text if err.response else str(err)
+        return JsonResponse({
+            "error": f"Error HTTP {status_code} de Wompi: {detail}"
+        }, status=status_code)
+    except Exception as e:
+        return JsonResponse({
+            "error": f"Error inesperado al crear la transacción: {e}"
+        }, status=500)
 
-    # 6) Devolver al JS la URL de 3DS para redirigir al emisor
+    # 4) Crear el registro de compra UNA VEZ que ya existen trans y resp
+    try:
+        with transaction.atomic():
+            cliente = Clientes.objects.create(
+                nombre=nombre,
+                apellido=apellido,
+                direccion=direccion,
+                email=email,
+                telefono=telefono
+            )
+            compra = TransaccionCompra3DS.objects.create(
+                transaccion3ds=trans,
+                transaccion3ds_respuesta=resp,
+            )
+    except Exception as e:
+        return JsonResponse({
+            "error": f"Error guardando el registro de compra en base de datos: {e}"
+        }, status=500)
+
+    # 5) Devolver al JS la URL de 3DS para redirigir al emisor
     return JsonResponse({
         "url3ds": resp.urlCompletarPago3Ds
-    })
+    }, status=200)
+
 
 
 def pago_directo_view(request):
